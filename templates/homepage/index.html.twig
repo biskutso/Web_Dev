@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Symfony Homepage{% endblock %}
+
+{% block body %}
+    <header>
+        <h1>La Fabrica Moto</h1>
+        <nav>
+            <ul>
+                <li><a href="{{path('homepage')}}">Home</a></li>
+                <li><a href="#">About</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="homepage">
+        <h1 class="title_logo">La Fabrica Moto</h1>
+        <p>Custom Builds</p>
+    </div>
+{% endblock %}
