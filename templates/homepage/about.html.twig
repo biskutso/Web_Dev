@@ -1,0 +1,67 @@
+{% extends 'navbar.html.twig' %}
+
+{% block title %}About Us | La Fábrica Moto{% endblock %}
+
+{% block body %}
+    {# --- HERO SECTION --- #}
+    <section  class="hero-section">
+        <div class="hero-content absolute inset-0 bg-black/70"></div>
+        <div class="relative z-10 text-center text-white px-6">
+            <h1 class="text-4xl md:text-4xl font-cinzel font-bold mb-3">ABOUT US</h1>
+            <p class="text-lg md:text-xl text-gray-300 font-montserrat">Crafting timeless motorcycles since 2010</p>
+        </div>
+    </section>
+
+    {# --- OUR STORY --- #}
+    <section class="bg-white py-20">
+        <div class="max-w-5xl mx-auto px-6 text-center">
+            <h2 class="text-4xl font-cinzel font-bold text-gray-900 mb-8">OUR STORY</h2>
+            <p class="text-gray-700 text-lg leading-relaxed font-montserrat">
+                La Fábrica Moto began as a small workshop fueled by passion for classic motorcycles. Over the years,
+                we’ve grown into a custom build house dedicated to reviving the soul of vintage bikes with modern
+                engineering and craftsmanship. Every build we take on is a tribute to the golden era of motorcycling —
+                bold, authentic, and built to last.
+            </p>
+        </div>
+    </section>
+
+    {# --- MISSION, VISION, VALUES --- #}
+    <section class="bg-[#f9f9f9] py-20">
+        <div class="max-w-6xl mx-auto px-8 grid md:grid-cols-3 gap-12 text-center">
+            <div class="flex flex-col items-center">
+                <h3 class="text-2xl font-cinzel text-[#C49A41] mb-4">OUR MISSION</h3>
+                <p class="text-gray-700 font-montserrat leading-relaxed">
+                    To create motorcycles that merge timeless aesthetics with contemporary performance — machines that inspire individuality and freedom.
+                </p>
+            </div>
+
+            <div class="flex flex-col items-center">
+                <h3 class="text-2xl font-cinzel text-[#C49A41] mb-4">OUR VISION</h3>
+                <p class="text-gray-700 font-montserrat leading-relaxed">
+                    To become a leading name in bespoke motorcycle craftsmanship, recognized for our artistry, precision, and dedication to riders worldwide.
+                </p>
+            </div>
+
+            <div class="flex flex-col items-center">
+                <h3 class="text-2xl font-cinzel text-[#C49A41] mb-4">OUR VALUES</h3>
+                <p class="text-gray-700 font-montserrat leading-relaxed">
+                    Integrity, creativity, and passion drive every weld, bolt, and polish we make — because each bike carries our name and our story.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    {# --- CALL TO ACTION / CLOSING --- #}
+    <section class="relative bg-black py-20 text-center text-white">
+        <div class="max-w-4xl mx-auto px-6">
+            <h2 class="text-3xl font-cinzel mb-4">Every motorcycle we build isn’t just a machine — it’s a piece of art, engineered with heart and vision.</h2>
+            <p class="text-gray-300 font-montserrat leading-relaxed mb-8">
+                Experience the spirit of craftsmanship that defines La Fábrica Moto.
+            </p>
+            <a href="{{ path('homepage') }}" 
+               class="bg-primary-color hover:bg-[#b38734] transition text-black font-semibold py-3 px-8 rounded-full">
+                Back to Home
+            </a>
+        </div>
+    </section>
+{% endblock %}

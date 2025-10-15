@@ -26,6 +26,8 @@
         "build": "encore production --progress"
     },
     "dependencies": {
+        "datatables.net": "^2.3.4",
+        "datatables.net-dt": "^2.3.4",
         "flowbite": "^3.1.2"
     },
     "name": "test",

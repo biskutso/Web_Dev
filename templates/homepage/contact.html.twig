@@ -1,0 +1,96 @@
+{% extends 'navbar.html.twig' %}
+
+{% block title %}Contact Us | La Fábrica Moto{% endblock %}
+
+{% block body %}
+    {# --- PAGE HEADER --- #}
+    <section class="hero-section">
+        <div class="hero-content absolute inset-0 bg-black/70">
+            <h1 class="text-4xl md:text-5xl font-cinzel font-bold mb-4">CONTACT US</h1>
+            <p class="text-lg md:text-xl text-gray-300 font-montserrat">
+                Let’s build your dream motorcycle together.
+            </p>
+        </div>
+    </section>
+
+    {# --- CONTACT INFO SECTION --- #}
+    <section class="bg-white py-20">
+        <div class="max-w-6xl mx-auto px-8 grid md:grid-cols-3 gap-12 text-center">
+            <div class="flex flex-col items-center">
+                <h3 class="text-2xl font-cinzel text-[#C49A41] mb-4">VISIT US</h3>
+                <p class="text-gray-700 font-montserrat leading-relaxed">
+                    La Fábrica Moto Workshop<br>
+                    123 Vintage Street, Makati City<br>
+                    Philippines
+                </p>
+            </div>
+
+            <div class="flex flex-col items-center">
+                <h3 class="text-2xl font-cinzel text-[#C49A41] mb-4">CALL US</h3>
+                <p class="text-gray-700 font-montserrat leading-relaxed">
+                    +63 912 345 6789<br>
+                    Mon – Sat, 9AM – 6PM
+                </p>
+            </div>
+
+            <div class="flex flex-col items-center">
+                <h3 class="text-2xl font-cinzel text-[#C49A41] mb-4">EMAIL US</h3>
+                <p class="text-gray-700 font-montserrat leading-relaxed">
+                    info@lafabricamoto.com<br>
+                    support@lafabricamoto.com
+                </p>
+            </div>
+        </div>
+    </section>
+
+    {# --- CONTACT FORM SECTION --- #}
+    <section class="bg-[#f9f9f9] py-20">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <h2 class="text-3xl font-cinzel font-bold text-gray-900 mb-8">GET IN TOUCH</h2>
+            <p class="text-gray-700 font-montserrat mb-10">
+                Have a question, a project idea, or just want to say hello?  
+                Fill out the form below and we’ll get back to you as soon as possible.
+            </p>
+
+            <form action="#" method="post" class="grid md:grid-cols-2 gap-8 font-montserrat text-left">
+                <div>
+                    <label for="name" class="block text-gray-700 mb-2">Name</label>
+                    <input type="text" id="name" name="name"
+                           class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#C49A41]">
+                </div>
+
+                <div>
+                    <label for="email" class="block text-gray-700 mb-2">Email</label>
+                    <input type="email" id="email" name="email"
+                           class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#C49A41]">
+                </div>
+
+                <div class="md:col-span-2">
+                    <label for="message" class="block text-gray-700 mb-2">Message</label>
+                    <textarea id="message" name="message" rows="5"
+                              class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#C49A41]"></textarea>
+                </div>
+
+                <div class="md:col-span-2 text-center">
+                    <button type="button"
+                            class="bg-[#C49A41] hover:bg-[#b38734] transition text-black font-semibold py-3 px-10 rounded-full">
+                        Send Message
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    {# --- CLOSING SECTION --- #}
+    <section class="bg-black text-white py-16 text-center">
+        <div class="max-w-3xl mx-auto px-6">
+            <h3 class="text-2xl font-cinzel mb-4">
+                Your vision, our craftsmanship — let’s make it a reality.
+            </h3>
+            <a href="{{ path('homepage') }}"
+               class="bg-[#C49A41] hover:bg-[#b38734] transition text-black font-semibold py-3 px-8 rounded-full">
+                Back to Home
+            </a>
+        </div>
+    </section>
+{% endblock %}

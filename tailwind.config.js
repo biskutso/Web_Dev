@@ -17,7 +17,17 @@ module.exports = {
     }
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        'dark-charcoal': '#1C1C1C',
+        'primary-gold': '#C49A41',
+        'hover-gold': '#a8813a',
+      },
+      fontFamily: {
+        cinzel: ['Cinzel Decorative', 'serif'],
+        montserrat: ['Montserrat', 'sans-serif'],
+      },
+    }
   },
   plugins: [
     require('flowbite/plugin')

@@ -1,0 +1,39 @@
+{{ form_start(form, {'attr': {'class': 'space-y-6'}}) }}
+
+    <div>
+        {{ form_label(form.customer_name, 'Name', {'label_attr': {'class': 'block text-sm font-medium text-gray-900'}}) }}
+        {{ form_widget(form.customer_name, {'attr': {'class': 'mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-black'}}) }}
+        {{ form_errors(form.customer_name) }}
+    </div>
+
+    <div>
+        {{ form_label(form.customer_email, 'Email', {'label_attr': {'class': 'block text-sm font-medium text-gray-900'}}) }}
+        {{ form_widget(form.customer_email, {'attr': {'class': 'mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-black'}}) }}
+        {{ form_errors(form.customer_email) }}
+    </div>
+
+    <div>
+        {{ form_label(form.customer_password, 'Password', {'label_attr': {'class': 'block text-sm font-medium text-gray-900'}}) }}
+        {{ form_widget(form.customer_password, {'attr': {'class': 'mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-black'}}) }}
+        {{ form_errors(form.customer_password) }}
+    </div>
+
+    <div>
+        {{ form_label(form.customer_address, 'Address', {'label_attr': {'class': 'block text-sm font-medium text-gray-900'}}) }}
+        {{ form_widget(form.customer_address, {'attr': {'class': 'mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-black'}}) }}
+        {{ form_errors(form.customer_address) }}
+    </div>
+
+    <div>
+        {{ form_label(form.customer_phonenumber, 'Phone Number', {'label_attr': {'class': 'block text-sm font-medium text-gray-900'}}) }}
+        {{ form_widget(form.customer_phonenumber, {'attr': {'class': 'mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-black'}}) }}
+        {{ form_errors(form.customer_phonenumber) }}
+    </div>
+
+    <div class="pt-4">
+        <button type="submit" class="w-full px-6 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 cursor-pointer">
+            ✅ Save Customer
+        </button>
+    </div>
+
+{{ form_end(form) }}
