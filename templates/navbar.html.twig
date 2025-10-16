@@ -69,8 +69,8 @@
   </head>
 
   <body class="bg-[#1C1C1C] flex flex-col">
-    <header>
-        <nav class="bg-[#1C1C1C] border-gray-200 px-4 lg:px-6 py-2.5    ">
+    <header class="fixed top-0 left-0 right-0 z-20">
+        <nav class="bg-[#1C1C1C] border-gray-200 px-4 lg:px-6 py-2.5">
             <div class="flex flex-wrap items-center justify-between max-w-screen-xl mx-auto">
                 <a href="{{ path('homepage') }}" class="flex items-center">
                     {# <img src="https://flowbite.com/docs/images/logo.svg" class="h-6 mr-3 sm:h-9" alt="Flowbite Logo" /> #}
@@ -113,7 +113,7 @@
                         </li>
 
                         <li>
-                            <a href="#"
+                            <a href=""
                             class="block py-2 pl-3 pr-4 rounded-sm lg:p-0
                                     {% if currentRoute == '' %}
                                         text-white lg:text-white font-semibold
@@ -125,7 +125,7 @@
                         </li>
 
                         <li>
-                            <a href="#"
+                            <a href=""
                             class="block py-2 pl-3 pr-4 rounded-sm lg:p-0
                                     {% if currentRoute == '' %}
                                         text-white lg:text-white font-semibold

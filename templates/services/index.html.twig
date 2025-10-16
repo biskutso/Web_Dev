@@ -1,19 +1,19 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Products index{% endblock %}
+{% block title %}Services index{% endblock %}
 
 {% block body %}
-{% include 'admin/sidebar.html.twig' %}
+    {% include 'admin/sidebar.html.twig' %}
 
 <div class="flex-1 flex flex-col overflow-hidden">
     {% include 'admin/header.html.twig' %}
 
     <div class="flex justify-center p-4">
         <div class="w-full max-w-7xl bg-white p-8 rounded-xl shadow-lg">
-            <h1 class="text-2xl font-bold mb-4 text-gray-800 text-center">Classic Motorcycles Index</h1>
+            <h1 class="text-2xl font-bold mb-4 text-gray-800 text-center">Services Index</h1>
 
             <div class="overflow-x-auto bg-gray-100 p-3 rounded-lg shadow-md">
-                <table id="productsTable" class="w-full border-collapse border border-gray-300 bg-white rounded-lg overflow-hidden shadow">
+                <table id="servicesTable" class="w-full border-collapse border border-gray-300 bg-white rounded-lg overflow-hidden shadow">
                     <thead class="bg-gray-100 text-gray-700">
                         <tr>
                             <th class="border border-gray-300 px-2 py-2 text-sm font-semibold text-left">Id</th>
@@ -21,25 +21,25 @@
                             <th class="border border-gray-300 px-2 py-2 text-sm font-semibold text-left">Description</th>
                             <th class="border border-gray-300 px-2 py-2 text-sm font-semibold text-left">Category</th>
                             <th class="border border-gray-300 px-2 py-2 text-sm font-semibold text-left">Price</th>
-                            <th class="border border-gray-300 px-2 py-2 text-sm font-semibold text-left">Quantity</th>
+                            <th class="border border-gray-300 px-2 py-2 text-sm font-semibold text-left">Status</th>
                             <th class="border border-gray-300 px-2 py-2 text-sm font-semibold text-center">Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="productsTableBody" class="divide-y divide-gray-200">
-                        {% for product in products %}
+                    <tbody id="servicesTableBody" class="divide-y divide-gray-200">
+                        {% for service in services %}
                             <tr class="odd:bg-white even:bg-gray-50 hover:bg-gray-100">
-                                <td class="border border-gray-300 px-2 py-1 text-center">{{ product.id }}</td>
-                                <td class="border border-gray-300 px-2 py-1 font-medium text-gray-900">{{ product.name }}</td>
-                                <td class="border border-gray-300 px-4 py-2 text-gray-700">{{ product.description }}</td>
+                                <td class="border border-gray-300 px-2 py-1 text-center">{{ service.id }}</td>
+                                <td class="border border-gray-300 px-2 py-1 font-medium text-gray-900">{{ service.name }}</td>
+                                <td class="border border-gray-300 px-4 py-2 text-gray-700">{{ service.description }}</td>
                                 <td class="border border-gray-300 px-2 py-1 font-medium text-gray-900">
-                                    {{ product.category ? product.category.categoryName : 'No category' }}
+                                    {{ service.category ? service.category.categoryName : 'No category' }}
                                 </td>
-                                <td class="border border-gray-300 px-2 py-1 text-gray-700 text-center">₱{{ product.price }}</td>
-                                <td class="border border-gray-300 px-2 py-1 text-gray-700 text-center">{{ product.quantity }}</td>
+                                <td class="border border-gray-300 px-2 py-1 text-gray-700 text-center">₱{{ service.price }}</td>
+                                <td class="border border-gray-300 px-2 py-1 text-gray-700 text-center">{{ service.status.value|capitalize }}</td>
                                 <td class="border border-gray-300 px-2 py-1 text-center">
-                                    <a href="{{ path('app_products_show', {'id': product.id}) }}" 
+                                    <a href="{{ path('app_services_show', {'id': service.id}) }}" 
                                        class="text-blue-600 hover:text-blue-800 font-semibold">Show</a> <br/>
-                                    <a href="{{ path('app_products_edit', {'id': product.id}) }}" 
+                                    <a href="{{ path('app_services_edit', {'id': service.id}) }}" 
                                        class="text-yellow-600 hover:text-yellow-800 font-semibold">Edit</a>
                                 </td>
                             </tr>
@@ -55,7 +55,7 @@
             </div>
 
             <div class="mt-6 text-center">
-                <a href="{{ path('app_products_new') }}" 
+                <a href="{{ path('app_services_new') }}" 
                    class="inline-block px-5 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700">
                     + Create new
                 </a>
@@ -63,5 +63,4 @@
         </div>
     </div>
 </div>
-
 {% endblock %}

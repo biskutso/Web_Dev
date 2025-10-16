@@ -9,6 +9,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use App\Entity\Categories;
+use Doctrine\ORM\EntityRepository;
 
 class ProductsType extends AbstractType
 {
@@ -26,7 +27,12 @@ class ProductsType extends AbstractType
             ->add('category', EntityType::class, [
                     'class' => Categories::class,
                     'choice_label' => 'category_name',
-                    'placeholder' => 'Select a category',
+                    'query_builder' => function (EntityRepository $er) {
+                        return $er->createQueryBuilder('c')
+                            ->where('c.type = :type')
+                            ->setParameter('type', 'product');
+                    },
+                    'placeholder' => 'Select Product Category',
                 ])
             ->add('price')
             ->add('quantity')

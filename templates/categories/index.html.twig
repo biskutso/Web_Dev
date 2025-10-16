@@ -11,14 +11,15 @@
 
         <div class="flex justify-center p-8">
             <div class="w-full max-w-5xl bg-white p-8 rounded-xl shadow-lg">
-                <h1 class="text-3xl font-bold mb-8  text-gray-800 text-center">Categories Index</h1>
+                <h1 class="text-2xl font-bold mb-4 text-gray-800 text-center">Categories Index</h1>
 
                 <div class="overflow-x-auto bg-gray-100 p-6 rounded-lg shadow-md">
-                    <table class="w-full border-collapse border border-gray-300 bg-white rounded-lg overflow-hidden shadow">
+                    <table id="categoriesTable" class="w-full border-collapse border border-gray-300 bg-white rounded-lg overflow-hidden shadow">
                         <thead class="bg-gray-100 text-gray-700">
                             <tr>
                                 <th class="border border-gray-300 px-4 py-2 text-sm font-semibold w-12 text-center">Id</th>
                                 <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-left w-40">Category Name</th>
+                                <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-left w-40">Category Type</th>
                                 <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-center w-32">Actions</th>
                             </tr>
                         </thead>
@@ -27,6 +28,7 @@
                                 <tr class="odd:bg-white even:bg-gray-50 hover:bg-gray-100">
                                     <td class="border border-gray-300 px-4 py-2 text-center">{{ category.id }}</td>
                                     <td class="border border-gray-300 px-4 py-2 font-medium text-gray-900">{{ category.categoryname }}</td>
+                                    <td class="border border-gray-300 px-4 py-2 font-medium text-gray-900">{{ category.type.value|capitalize }}</td>
                                     <td class="border border-gray-300 px-4 py-2 text-center space-x-3">
                                         <a href="{{ path('app_categories_show', {'id': category.id}) }}" 
                                         class="text-blue-600 hover:text-blue-800 font-semibold">Show</a>

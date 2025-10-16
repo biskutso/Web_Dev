@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\CategoriesType;
 use App\Repository\CategoriesRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -24,9 +25,20 @@ class Categories
     #[ORM\OneToMany(targetEntity: Products::class, mappedBy: 'category')]
     private Collection $products;
 
+    // 👇 Changed this part
+    #[ORM\Column(type: 'string', length: 50, enumType: CategoriesType::class)]
+    private ?CategoriesType $type = null;
+
+    /**
+     * @var Collection<int, Services>
+     */
+    #[ORM\OneToMany(targetEntity: Services::class, mappedBy: 'category')]
+    private Collection $services;
+
     public function __construct()
     {
         $this->products = new ArrayCollection();
+        $this->services = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -42,7 +54,6 @@ class Categories
     public function setCategoryName(string $category_name): static
     {
         $this->category_name = $category_name;
-
         return $this;
     }
 
@@ -67,7 +78,6 @@ class Categories
     public function removeProduct(Products $product): static
     {
         if ($this->products->removeElement($product)) {
-            // set the owning side to null (unless already changed)
             if ($product->getCategory() === $this) {
                 $product->setCategory(null);
             }
@@ -75,4 +85,47 @@ class Categories
 
         return $this;
     }
+
+    // 👇 Enum getter/setter
+    public function getType(): ?CategoriesType
+    {
+        return $this->type;
+    }
+
+    public function setType(?CategoriesType $type): static
+    {
+        $this->type = $type;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Services>
+     */
+    public function getServices(): Collection
+    {
+        return $this->services;
+    }
+
+    public function addService(Services $service): static
+    {
+        if (!$this->services->contains($service)) {
+            $this->services->add($service);
+            $service->setCategory($this);
+        }
+
+        return $this;
+    }
+
+    public function removeService(Services $service): static
+    {
+        if ($this->services->removeElement($service)) {
+            // set the owning side to null (unless already changed)
+            if ($service->getCategory() === $this) {
+                $service->setCategory(null);
+            }
+        }
+
+        return $this;
+    }
+    
 }
