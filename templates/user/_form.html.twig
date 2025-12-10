@@ -1,0 +1,33 @@
+{{ form_start(form, {'attr': {'class': 'space-y-6'}}) }}
+
+    <div>
+        {{ form_label(form.username, 'Username', {'label_attr': {'class': 'block text-sm font-medium text-gray-900'}}) }}
+        {{ form_widget(form.username, {'attr': {'class': 'mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-black p-2'}}) }}
+        {{ form_errors(form.username) }}
+    </div>
+
+    <div>
+        {{ form_label(form.password, 'Password', {'label_attr': {'class': 'block text-sm font-medium text-gray-900'}}) }}
+        {{ form_widget(form.password, {'attr': {'class': 'mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-black p-2'}}) }}
+        {{ form_errors(form.password) }}
+    </div>
+
+    <div>
+        {{ form_label(form.roles, 'Role', {'label_attr': {'class': 'block text-sm font-medium text-gray-900'}}) }}
+        {{ form_widget(form.roles, {'attr': {'class': 'mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-black p-2'}}) }}
+        {{ form_errors(form.roles) }}
+    </div>
+
+    <div>
+        {{ form_label(form.status, 'Status', {'label_attr': {'class': 'block text-sm font-medium text-gray-900'}}) }}
+        {{ form_widget(form.status, {'attr': {'class': 'mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-black p-2'}}) }}
+        {{ form_errors(form.status) }}
+    </div>
+
+    <div class="pt-4">
+        <button type="submit" class="w-full px-6 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 cursor-pointer">
+            ✅ {{ button_label|default('Save User') }}
+        </button>
+    </div>
+
+{{ form_end(form) }}

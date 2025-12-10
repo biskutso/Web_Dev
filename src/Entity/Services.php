@@ -30,6 +30,9 @@ class Services
     #[ORM\Column(enumType: ServicesType::class)]
     private ?ServicesType $status = null;
 
+    #[ORM\ManyToOne(inversedBy: 'services')]
+    private ?User $created_by = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -91,6 +94,18 @@ class Services
     public function setStatus(ServicesType $status): static
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getCreatedBy(): ?User
+    {
+        return $this->created_by;
+    }
+
+    public function setCreatedBy(?User $created_by): static
+    {
+        $this->created_by = $created_by;
 
         return $this;
     }

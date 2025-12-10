@@ -35,6 +35,9 @@ class Categories
     #[ORM\OneToMany(targetEntity: Services::class, mappedBy: 'category')]
     private Collection $services;
 
+    #[ORM\ManyToOne(inversedBy: 'categories')]
+    private ?User $created_by = null;
+
     public function __construct()
     {
         $this->products = new ArrayCollection();
@@ -124,6 +127,18 @@ class Categories
                 $service->setCategory(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCreatedBy(): ?User
+    {
+        return $this->created_by;
+    }
+
+    public function setCreatedBy(?User $created_by): static
+    {
+        $this->created_by = $created_by;
 
         return $this;
     }

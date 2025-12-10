@@ -28,6 +28,9 @@ class Products
     #[ORM\ManyToOne(inversedBy: 'products')]
     private ?Categories $category = null;
 
+    #[ORM\ManyToOne(inversedBy: 'created_by')]
+    private ?User $created_by = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -89,6 +92,18 @@ class Products
     public function setCategory(?Categories $category): static
     {
         $this->category = $category;
+
+        return $this;
+    }
+
+    public function getCreatedBy(): ?User
+    {
+        return $this->created_by;
+    }
+
+    public function setCreatedBy(?User $created_by): static
+    {
+        $this->created_by = $created_by;
 
         return $this;
     }

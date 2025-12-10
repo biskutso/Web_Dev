@@ -28,6 +28,10 @@
                             <th class="w-40 border border-gray-300 px-4 py-3 text-left bg-gray-100 font-semibold">Category Type</th>
                             <td class="px-4 py-3 border border-gray-300">{{ category.type.value|capitalize }}</td>
                         </tr>
+                        <tr>
+                            <th class="w-40 border border-gray-300 px-4 py-3 text-left bg-gray-100 font-semibold">Created By</th>
+                            <td class="px-4 py-3 border border-gray-300">{{ category.createdby ? category.createdby.username|capitalize }}</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>

@@ -4,3 +4,20 @@
 @import "flowbite/src/themes/default";
 @plugin "flowbite/plugin";
 @source "../../node_modules/flowbite";
+
+
+.toggle-password {
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    outline: none;
+    transition: color 0.2s;
+}
+
+.toggle-password:hover svg {
+    color: #666;
+}
+
+.toggle-password:focus {
+    outline: none;
+}

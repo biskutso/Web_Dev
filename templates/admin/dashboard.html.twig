@@ -13,7 +13,9 @@
 
         <!-- Main Content Area -->
         <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
-            <h2 class="text-xl font-cinzel text-[#1C1C1C] mb-6">Welcome, Admin!</h2>
+            {% if app.user %}
+            <h2 class="text-xl font-cinzel text-[#1C1C1C] mb-6">Welcome, {{ app.user.userIdentifier }}!</h2>
+            {% endif %}
 
             <!-- KPI Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

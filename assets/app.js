@@ -35,6 +35,7 @@ $(document).ready(function () {
   $('#customersTable').DataTable();
   $('#categoriesTable').DataTable();
   $('#servicesTable').DataTable();
+  $('#usersTable').DataTable();
 });
 
 // ==========================
@@ -184,3 +185,91 @@ select.dt-input:focus {
 `;
 document.head.appendChild(style);
 
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Password toggle functionality
+    const toggleButtons = document.querySelectorAll('.toggle-password');
+    
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const passwordInput = document.getElementById(targetId);
+            const icon = this.querySelector('svg');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                // Change to eye-off icon
+                icon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L6.59 6.59m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                `;
+            } else {
+                passwordInput.type = 'password';
+                // Change back to eye icon
+                icon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                `;
+            }
+        });
+    });
+
+    const forms = document.querySelectorAll('form');
+
+    forms.forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            const newPassword = document.getElementById('new_password');
+            const confirmPassword = document.getElementById('confirm_password');
+
+            if (newPassword && confirmPassword && form.querySelector('[name="change_password"]')) {
+                if (newPassword.value !== confirmPassword.value) {
+                    e.preventDefault();
+                    showAlert('New password and confirmation do not match!', 'error');
+                    return;
+                }
+                if (newPassword.value.length < 6) {
+                    e.preventDefault();
+                    showAlert('Password must be at least 6 characters!', 'error');
+                    return;
+                }
+            }
+
+            const usernameInput = document.getElementById('username');
+            if (usernameInput && form.querySelector('[name="update_profile"]')) {
+                if (usernameInput.value.trim() === '') {
+                    e.preventDefault();
+                    showAlert('Username cannot be empty!', 'error');
+                }
+            }
+        });
+    });
+
+    function showAlert(message, type = 'error') {
+        // Remove existing alert if present
+        const existingAlert = document.querySelector('.custom-alert');
+        if (existingAlert) {
+            existingAlert.remove();
+        }
+
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `custom-alert fixed top-6 left-1/2 transform -translate-x-1/2 z-50 bg-${type === 'error' ? 'red' : 'green'}-100 border border-${type === 'error' ? 'red' : 'green'}-400 text-${type === 'error' ? 'red' : 'green'}-700 px-6 py-4 rounded-lg shadow-lg flex items-center justify-between min-w-64 max-w-md`;
+        
+        alertDiv.innerHTML = `
+            <span>${message}</span>
+            <button type="button" onclick="this.parentElement.remove()" 
+                    class="ml-4 text-${type === 'error' ? 'red' : 'green'}-700 hover:text-${type === 'error' ? 'red' : 'green'}-900">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+            </button>
+        `;
+        
+        document.body.appendChild(alertDiv);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+});
