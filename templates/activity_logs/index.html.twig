@@ -21,7 +21,7 @@
                                 <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-left w-40">Role</th>
                                 <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-left w-40">Action</th>
                                 <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-left w-40">Target Data</th>
-                                <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-center w-32">Date & Time</th>
+                                <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-center w-40">Date & Time</th>
                             </tr>
                         </thead>
                         <tbody id="productsTableBody" class="divide-y divide-gray-200">
@@ -31,7 +31,7 @@
                                     <td class="border border-gray-300 px-4 py-2 font-medium text-gray-900">{{ log.role }}</td>
                                     <td class="border border-gray-300 px-4 py-2 font-medium text-gray-900">{{ log.action }}</td>
                                     <td class="border border-gray-300 px-4 py-2 font-medium text-gray-900">{{ log.targetData }}</td>
-                                    <td class="border border-gray-300 px-4 py-2 font-medium text-gray-900">{{ log.Datetime|date('Y-m-d H:i:s') }}</td>
+                                    <td class="border border-gray-300 px-4 py-2 font-medium text-gray-900">{{ log.datetime|date('Y-m-d h:i A', 'Asia/Manila') }}</td>
                                 </tr>
                             {% else %}
                                 <tr>

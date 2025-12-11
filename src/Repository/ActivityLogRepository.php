@@ -16,6 +16,29 @@ class ActivityLogRepository extends ServiceEntityRepository
         parent::__construct($registry, ActivityLog::class);
     }
 
+    // Add this method to get recent logs
+    public function findRecentLogs(int $limit = 3): array
+    {
+        return $this->createQueryBuilder('l')
+            ->orderBy('l.datetime', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+    // Add this to also get logs with user relation pre-loaded
+    public function findRecentLogsWithUser(int $limit = 5): array
+    {
+        return $this->createQueryBuilder('l')
+            ->leftJoin('l.userId', 'u')
+            ->addSelect('u')
+            ->orderBy('l.datetime', 'DESC')
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+    }
+
+
     //    /**
     //     * @return ActivityLog[] Returns an array of ActivityLog objects
     //     */

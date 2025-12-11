@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: ActivityLogRepository::class)]
 class ActivityLog
 {
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -28,7 +29,7 @@ class ActivityLog
     #[ORM\Column(length: 255)]
     private ?string $targetData = null;
 
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column(name: 'datetime', type: 'datetime_immutable', nullable: true)]
     private ?\DateTimeImmutable $datetime = null;
 
     public function getId(): ?int
@@ -106,5 +107,11 @@ class ActivityLog
         $this->datetime = $datetime;
 
         return $this;
+    }
+
+    public function __construct()
+    {
+        $manilaTimeZone = new \DateTimeZone('Asia/Manila');
+        $this->datetime = new \DateTimeImmutable('now', $manilaTimeZone);
     }
 }

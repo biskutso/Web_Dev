@@ -38,7 +38,7 @@
                                     {{ user.roles|map(role => role|replace({'ROLE_': ''}))|join(', ') }}
                                 </td>
                                 <td class="border border-gray-300 px-2 py-1 text-gray-700 text-center">{{ user.status }}</td>
-                                <td class="border border-gray-300 px-2 py-1 text-gray-700 text-center">{{ user.createdAt ? user.createdAt|date('Y-m-d H:i:s') : 'N/A' }}</td>
+                                <td class="border border-gray-300 px-2 py-1 text-gray-700 text-center">{{ user.createdAt ? user.createdAt|date('Y-m-d h:i A', 'Asia/Manila') : 'N/A' }}</td>
                                 <td class="border border-gray-300 px-2 py-1 text-center">
                                     <a href="{{ path('app_user_show', {'id': user.id}) }}" 
                                        class="text-blue-600 hover:text-blue-800 font-semibold">Show</a> <br/>

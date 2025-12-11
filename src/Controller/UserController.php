@@ -11,7 +11,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Service\ActivityLogger;
 
+#[IsGranted('ROLE_ADMIN')]
 #[Route('/user')]
 final class UserController extends AbstractController
 {
@@ -24,7 +27,7 @@ final class UserController extends AbstractController
     }
 
     #[Route('/new', name: 'app_user_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, ActivityLogger $activitylogger): Response
     {
         $user = new User();
         $form = $this->createForm(UserType::class, $user, [
@@ -45,6 +48,11 @@ final class UserController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
+            $activitylogger->log(
+                'Created User',
+                'User: ' . $user->getusername() . ' Role: ' . str_replace('ROLE_', '', $user->getPrimaryRole()) . ' (ID:' . $user->getId() . ')'
+            );
+
             $this->addFlash('success', 'User created successfully.');
             return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -64,7 +72,7 @@ final class UserController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_user_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, User $user, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
+    public function edit(Request $request, User $user, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, ActivityLogger $activitylogger): Response
     {
         $form = $this->createForm(UserType::class, $user, [
             'is_new' => false,
@@ -84,6 +92,11 @@ final class UserController extends AbstractController
             
             $entityManager->flush();
 
+            $activitylogger->log(
+                'Edited User',
+                'User: ' . $user->getusername() . ' Role: ' . str_replace('ROLE_', '', $user->getPrimaryRole()) . ' (ID:' . $user->getId() . ')'
+            );
+
             $this->addFlash('success', 'User updated successfully.');
             return $this->redirectToRoute('app_user_index', [], Response::HTTP_SEE_OTHER);
         }
@@ -95,12 +108,21 @@ final class UserController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_user_delete', methods: ['POST'])]
-    public function delete(Request $request, User $user, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, User $user, EntityManagerInterface $entityManager, ActivityLogger $activitylogger): Response
     {
         if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->getPayload()->getString('_token'))) {
+            $usertId = $user->getId();
+            $userName = $user->getusername();
+            $userRole = str_replace('ROLE_', '', $user->getPrimaryRole());
+           
             $entityManager->remove($user);
             $entityManager->flush();
             
+            $activitylogger->log(
+                'Deleted User',
+                'User: ' . $userName . ' Role: ' . $userRole . ' (ID:' . $usertId . ')'
+            );
+
             $this->addFlash('success', 'User deleted successfully.');
         }
 

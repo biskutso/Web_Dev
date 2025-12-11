@@ -36,11 +36,31 @@
                                     <td class="border border-gray-300 px-4 py-2 font-medium text-gray-900">{{ category.categoryname }}</td>
                                     <td class="border border-gray-300 px-4 py-2 font-medium text-gray-900">{{ category.type.value|capitalize }}</td>
                                     <td class="border border-gray-300 px-4 py-2 font-medium text-gray-900">{{ category.createdby ? category.createdby.username|capitalize }}</td>
-                                    <td class="border border-gray-300 px-4 py-2 text-center space-x-3">
-                                        <a href="{{ path('app_categories_show', {'id': category.id}) }}" 
-                                        class="text-blue-600 hover:text-blue-800 font-semibold">Show</a>
-                                        <a href="{{ path('app_categories_edit', {'id': category.id}) }}" 
-                                        class="text-yellow-600 hover:text-yellow-800 font-semibold">Edit</a>
+                                    <td class="border border-gray-300 px-4 py-2 text-center">
+                                        {# Admin can do actions on all categories #}
+                                        {% if is_granted('ROLE_ADMIN') %}
+                                            <a href="{{ path('app_categories_show', {'id': category.id}) }}" 
+                                            class="text-blue-600 hover:text-blue-800 font-semibold">Show</a>
+                                            <a href="{{ path('app_categories_edit', {'id': category.id}) }}" 
+                                            class="text-yellow-600 hover:text-yellow-800 font-semibold">Edit</a>
+                                        
+                                        {# Staff can only do actions on their own categories #}
+                                        {% elseif is_granted('ROLE_STAFF') %}
+                                            {% if category.createdby and app.user and category.createdby.id == app.user.id %}
+                                                {# Staff can access their own categories #}
+                                                <a href="{{ path('app_categories_show', {'id': category.id}) }}" 
+                                                class="text-blue-600 hover:text-blue-800 font-semibold">Show</a>
+                                                <a href="{{ path('app_categories_edit', {'id': category.id}) }}" 
+                                                class="text-yellow-600 hover:text-yellow-800 font-semibold">Edit</a>
+                                            {% else %}
+                                                {# Staff can see but not access other staff's categories #}
+                                                <span class="text-red-500 text-sm font-medium">Not accessible</span>
+                                            {% endif %}
+                                        
+                                        {# For any other roles, no actions available #}
+                                        {% else %}
+                                            <span class="text-gray-500 text-sm font-medium">No actions available</span>
+                                        {% endif %}
                                     </td>
                                 </tr>
                             {% else %}
@@ -56,10 +76,13 @@
                 </div>
 
                 <div class="mt-6 text-center">
-                    <a href="{{ path('app_categories_new') }}" 
-                    class="inline-block px-5 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 ">
-                        + Create new
-                    </a>
+                    {# Both Admin and Staff can create new categories #}
+                    {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF') %}
+                        <a href="{{ path('app_categories_new') }}" 
+                        class="inline-block px-5 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 ">
+                            + Create new
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         </div>

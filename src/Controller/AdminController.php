@@ -3,6 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Repository\UserRepository;
+use App\Repository\ProductsRepository;
+use App\Repository\ActivityLogRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -11,14 +14,21 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Doctrine\ORM\EntityManagerInterface;
 
-#[Route('/admin')]
-#[IsGranted('ROLE_ADMIN')]
+#[Route('/system')]
 final class AdminController extends AbstractController
 {
     #[Route('', name: 'app_admin')]
-    public function index(): Response
+    public function index(UserRepository $userRepository, ProductsRepository $productsRepository, ActivityLogRepository $activityLogRepository): Response
     {
+
+        $roleCounts = $userRepository->getUserCountsByRole();
+
         return $this->render('admin/dashboard.html.twig', [
+            'total_users' => $userRepository->count([]),
+            'total_products' => $productsRepository->count([]),
+            'role_counts' => $roleCounts,
+            'total_active' => $userRepository->count(['status' => 'Active']),
+            'recent_logs' =>  $activityLogRepository->findRecentLogsWithUser(3),
             'controller_name' => 'AdminController',
         ]);
     }
