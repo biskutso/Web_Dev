@@ -8,110 +8,185 @@ use App\Entity\Services;
 use App\Entity\User;
 use App\Form\OrdersType;
 use App\Repository\OrdersRepository;
+use App\Repository\ProductsRepository;
+use App\Repository\ServicesRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
-use App\Service\ActivityLogger;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 #[Route('/orders')]
-final class OrdersController extends AbstractController
+class OrdersController extends AbstractController
 {
-    #[Route(name: 'app_orders_index', methods: ['GET'])]
+    #[Route('/', name: 'app_orders_index', methods: ['GET'])]
     public function index(OrdersRepository $ordersRepository): Response
     {
+        // Check if user is logged in
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        
+        // Get orders based on user role
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $orders = $ordersRepository->findAll();
+        } elseif ($this->isGranted('ROLE_STAFF')) {
+            $orders = $ordersRepository->findBy(['createdBy' => $this->getUser()]);
+        } else {
+            $orders = $ordersRepository->findBy(['user' => $this->getUser()]);
+        }
+
         return $this->render('orders/index.html.twig', [
-            'orders' => $ordersRepository->findAll(),
+            'orders' => array_map(function (Orders $order) {
+                return [
+                    'id' => $order->getId(),
+
+                    // USER - use snapshot if user is deleted
+                    'user' => $order->getUser()
+                        ? $order->getUser()->getUsername()
+                        : ($order->getUserNameSnapshot() ?: 'Unknown User'),
+                    
+                    // Pass snapshot for display
+                    'userNameSnapshot' => $order->getUserNameSnapshot(),
+
+                    // CREATED BY
+                    'createdBy' => $order->getCreatedBy()
+                        ? $order->getCreatedBy()->getUsername()
+                        : 'N/A',
+
+                    // PRODUCT (use snapshot if product is deleted)
+                    'product' => $order->getProductId()
+                        ? $order->getProductId()->getName()
+                        : null,
+                    
+                    // Pass snapshot for display
+                    'productNameSnapshot' => $order->getProductNameSnapshot(),
+
+                    // SERVICE (use snapshot if service is deleted)
+                    'service' => $order->getServiceId()
+                        ? $order->getServiceId()->getName()
+                        : null,
+                    
+                    // Pass snapshot for display
+                    'serviceNameSnapshot' => $order->getServiceNameSnapshot(),
+
+                    // CATEGORY (use snapshot if category is deleted)
+                    'category' => $order->getCategoryId()
+                        ? $order->getCategoryId()->getCategoryName()
+                        : null,
+                    
+                    // Pass snapshot for display
+                    'categoryNameSnapshot' => $order->getCategoryNameSnapshot(),
+
+                    'price' => $order->getPrice(),
+                    'quantity' => $order->getQuantity(),
+                    'orderCreated' => $order->getOrderCreated(),
+                ];
+            }, $orders),
         ]);
     }
 
     #[Route('/new', name: 'app_orders_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, ActivityLogger $activitylogger): Response
+    public function new(
+        Request $request,
+        EntityManagerInterface $em,
+        ProductsRepository $productsRepository,
+        ServicesRepository $servicesRepository,
+        UserRepository $userRepository
+    ): Response
     {
+        // Check if user is logged in
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         
-        if (!$this->isGranted('ROLE_ADMIN') && !$this->isGranted('ROLE_STAFF') && !$this->isGranted('ROLE_USER')) {
-            throw new AccessDeniedException('You do not have permission to create orders.');
-        }
-        
         $order = new Orders();
-        $currentUser = $this->getUser();
         
-        // Set the current user
-        if ($currentUser instanceof User) {
-            $order->setUser($currentUser);
-            $order->setCreatedBy($currentUser);
-        }
-        
-        $form = $this->createForm(OrdersType::class, $order);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            // Handle user selection for admin/staff
-            if (($this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_STAFF')) && $request->request->has('selected_user')) {
-                $selectedUserId = $request->request->get('selected_user');
-                if ($selectedUserId) {
-                    $selectedUser = $entityManager->getRepository(User::class)->find($selectedUserId);
-                    if ($selectedUser) {
-                        $order->setUser($selectedUser);
-                    }
-                }
-            }
-            
-            // Handle product quantity reduction
-            $product = $order->getProductId();
-            if ($product && $product->getQuantity() > 0) {
-                $product->setQuantity($product->getQuantity() - 1);
-                $entityManager->persist($product);
-            }
-            
-            $entityManager->persist($order);
-            $entityManager->flush();
-
-            // Get details for logging
-            $productName = $product ? $product->getName() : 'None';
-            $serviceName = $order->getServiceId() ? $order->getServiceId()->getName() : 'None';
-            $orderUser = $order->getUser();
-            $userName = $orderUser ? $orderUser->getUserIdentifier() : 'Unknown';
-            $createdByName = $order->getCreatedBy() ? $order->getCreatedBy()->getUserIdentifier() : 'Unknown';
-
-            // Use standardized action names
-            $activitylogger->log(
-                'Created Order',
-                'Order ID: ' . $order->getId() . 
-                ' | Product: ' . $productName .
-                ' | Service: ' . $serviceName .
-                ' | User: ' . $userName .
-                ' | Created By: ' . $createdByName
-            );
-
-            $this->addFlash('success', 'Order created successfully!');
-            return $this->redirectToRoute('app_orders_index', [], Response::HTTP_SEE_OTHER);
-        }
-
-        // Get available products and services
-        $products = $entityManager->getRepository(Products::class)
-            ->createQueryBuilder('p')
+        // Get available products (only those with quantity > 0)
+        $products = $productsRepository->createQueryBuilder('p')
             ->where('p.quantity > 0')
             ->getQuery()
             ->getResult();
         
-        $services = $entityManager->getRepository(Services::class)->findAll();
+        $services = $servicesRepository->findAll();
         
-        // Get ROLE_USER users for admin/staff
+        // Get users (for admin/staff selection)
         $users = [];
         if ($this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_STAFF')) {
-            $users = $entityManager->getRepository(User::class)
-                ->createQueryBuilder('u')
-                ->where('u.roles LIKE :role')
-                ->setParameter('role', '%ROLE_USER%')
-                ->orderBy('u.username', 'ASC')
-                ->getQuery()
-                ->getResult();
+            $users = $userRepository->findBy([], ['username' => 'ASC']);
         }
-
+        
+        // Create form
+        $form = $this->createForm(OrdersType::class, $order);
+        $form->handleRequest($request);
+        
+        if ($form->isSubmitted() && $form->isValid()) {
+            try {
+                // Handle user selection
+                if ($this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_STAFF')) {
+                    $selectedUserId = $request->request->get('selected_user');
+                    if ($selectedUserId) {
+                        $selectedUser = $userRepository->find($selectedUserId);
+                        if ($selectedUser) {
+                            $order->setUser($selectedUser);
+                        } else {
+                            $order->setUser($this->getUser());
+                        }
+                    } else {
+                        $order->setUser($this->getUser());
+                    }
+                } else {
+                    // Regular users order for themselves
+                    $order->setUser($this->getUser());
+                }
+                
+                // Set created by
+                $order->setCreatedBy($this->getUser());
+                
+                // Handle item selection
+                $itemType = $form->get('itemType')->getData();
+                $itemId = $form->get('selectedItem')->getData();
+                
+                if ($itemType === 'product' && $itemId) {
+                    $product = $productsRepository->find($itemId);
+                    if ($product) {
+                        $order->setProductId($product);
+                        $order->setPrice($product->getPrice());
+                        // Set category from product
+                        if ($product->getCategory()) {
+                            $order->setCategoryId($product->getCategory());
+                        }
+                        // Update product quantity
+                        $product->setQuantity($product->getQuantity() - 1);
+                        $em->persist($product);
+                    }
+                } elseif ($itemType === 'service' && $itemId) {
+                    $service = $servicesRepository->find($itemId);
+                    if ($service) {
+                        $order->setServiceId($service);
+                        $order->setPrice($service->getPrice());
+                        // Set category from service
+                        if ($service->getCategory()) {
+                            $order->setCategoryId($service->getCategory());
+                        }
+                    }
+                }
+                
+                // Set snapshot data
+                $order->setProductNameSnapshot($order->getProductId() ? $order->getProductId()->getName() : null);
+                $order->setServiceNameSnapshot($order->getServiceId() ? $order->getServiceId()->getName() : null);
+                $order->setCategoryNameSnapshot($order->getCategoryId() ? $order->getCategoryId()->getCategoryName() : null);
+                $order->setUserNameSnapshot($order->getUser() ? $order->getUser()->getUsername() : null);
+                
+                $em->persist($order);
+                $em->flush();
+                
+                $this->addFlash('success', 'Order created successfully!');
+                return $this->redirectToRoute('app_orders_index');
+                
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Error creating order: ' . $e->getMessage());
+            }
+        }
+        
         return $this->render('orders/new.html.twig', [
             'form' => $form->createView(),
             'products' => $products,
@@ -120,181 +195,257 @@ final class OrdersController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_orders_show', methods: ['GET'])]
-    public function show(Orders $order): Response
+    #[Route('/edit/{id}', name: 'app_orders_edit', methods: ['GET', 'POST'])]
+    public function edit(
+        Request $request, 
+        Orders $order, 
+        EntityManagerInterface $em,
+        ProductsRepository $productsRepository,
+        ServicesRepository $servicesRepository
+    ): Response
     {
-        $this->checkOrderAccess($order, 'view');
+        // Check if user is logged in
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         
-        return $this->render('orders/show.html.twig', [
-            'order' => $order,
-        ]);
-    }
-
-    #[Route('/{id}/edit', name: 'app_orders_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Orders $order, EntityManagerInterface $entityManager, ActivityLogger $activitylogger): Response
-    {
+        // Check if user has permission to edit this order
         $this->checkOrderAccess($order, 'edit');
         
-        // Store original product before form changes
-        $originalProduct = $order->getProductId();
-        $originalService = $order->getServiceId();
+        // Get available products and services
+        $products = $productsRepository->createQueryBuilder('p')
+            ->where('p.quantity > 0')
+            ->getQuery()
+            ->getResult();
         
+        $services = $servicesRepository->findAll();
+        
+        // Store original order details for comparison
+        $originalItem = $order->getProductId() 
+            ? ($order->getProductId()->getName() . ' (Product)')
+            : ($order->getServiceId() 
+                ? ($order->getServiceId()->getName() . ' (Service)') 
+                : 'No Item');
+        $originalPrice = $order->getPrice();
+        
+        // Create the form using your existing OrdersType
         $form = $this->createForm(OrdersType::class, $order);
         $form->handleRequest($request);
-
-        // Get all available products and services for display
-        $products = $entityManager->getRepository(Products::class)->findAll();
-        $services = $entityManager->getRepository(Services::class)->findAll();
-
+        
         if ($form->isSubmitted() && $form->isValid()) {
-            // Handle inventory changes
-            $newProduct = $order->getProductId();
-            $newService = $order->getServiceId();
-            
-            $changes = [];
-            
-            // Changing from product to different product
-            if ($originalProduct && $newProduct && $originalProduct->getId() !== $newProduct->getId()) {
-                // Return quantity to original product
-                $originalProduct->setQuantity($originalProduct->getQuantity() + 1);
-                $entityManager->persist($originalProduct);
-                $changes[] = 'Returned product: ' . $originalProduct->getName();
+            try {
+                // Get the submitted data
+                $selectedItemId = $form->get('selectedItem')->getData();
+                $itemType = $form->get('itemType')->getData();
                 
-                // Remove quantity from new product
-                if ($newProduct->getQuantity() > 0) {
-                    $newProduct->setQuantity($newProduct->getQuantity() - 1);
-                    $entityManager->persist($newProduct);
-                    $changes[] = 'Added product: ' . $newProduct->getName();
+                // Store original product for quantity restoration
+                $originalProduct = $order->getProductId();
+                $originalService = $order->getServiceId();
+                
+                // Handle item selection from cards
+                if ($selectedItemId && $itemType) {
+                    if ($itemType === 'product') {
+                        $product = $productsRepository->find($selectedItemId);
+                        if ($product) {
+                            // Restore original product quantity if changing from product
+                            if ($originalProduct && $originalProduct->getId() != $product->getId()) {
+                                $originalProduct->setQuantity($originalProduct->getQuantity() + $order->getQuantity());
+                                $em->persist($originalProduct);
+                            }
+                            
+                            // Set new product and reduce its quantity
+                            $order->setProductId($product);
+                            $order->setServiceId(null);
+                            $product->setQuantity($product->getQuantity() - $order->getQuantity());
+                            $em->persist($product);
+                            
+                            if ($product->getCategory()) {
+                                $order->setCategoryId($product->getCategory());
+                            }
+                            
+                            $order->setPrice($product->getPrice());
+                        }
+                    } elseif ($itemType === 'service') {
+                        $service = $servicesRepository->find($selectedItemId);
+                        if ($service) {
+                            // Restore original product quantity if changing from product to service
+                            if ($originalProduct) {
+                                $originalProduct->setQuantity($originalProduct->getQuantity() + $order->getQuantity());
+                                $em->persist($originalProduct);
+                            }
+                            
+                            // Set new service
+                            $order->setServiceId($service);
+                            $order->setProductId(null);
+                            
+                            if ($service->getCategory()) {
+                                $order->setCategoryId($service->getCategory());
+                            }
+                            
+                            $order->setPrice($service->getPrice());
+                        }
+                    }
                 }
+                
+                // Update snapshot data
+                $order->setProductNameSnapshot($order->getProductId() ? $order->getProductId()->getName() : null);
+                $order->setServiceNameSnapshot($order->getServiceId() ? $order->getServiceId()->getName() : null);
+                $order->setCategoryNameSnapshot($order->getCategoryId() ? $order->getCategoryId()->getCategoryName() : null);
+                
+                $em->flush();
+                
+                // Get new order details
+                $newItem = $order->getProductId() 
+                    ? ($order->getProductId()->getName() . ' (Product)')
+                    : ($order->getServiceId() 
+                        ? ($order->getServiceId()->getName() . ' (Service)') 
+                        : 'No Item');
+                $newPrice = $order->getPrice();
+                
+                $this->addFlash('success', 'Order updated successfully!');
+                return $this->redirectToRoute('app_orders_index');
+                
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Error updating order: ' . $e->getMessage());
             }
-            // Changing from product to service
-            elseif ($originalProduct && $newService) {
-                // Return quantity to original product
-                $originalProduct->setQuantity($originalProduct->getQuantity() + 1);
-                $entityManager->persist($originalProduct);
-                $changes[] = 'Returned product: ' . $originalProduct->getName();
-                $changes[] = 'Added service: ' . $newService->getName();
-            }
-            // Changing from service to product
-            elseif ($originalService && $newProduct) {
-                // Remove quantity from new product
-                if ($newProduct->getQuantity() > 0) {
-                    $newProduct->setQuantity($newProduct->getQuantity() - 1);
-                    $entityManager->persist($newProduct);
-                    $changes[] = 'Added product: ' . $newProduct->getName();
-                }
-                $changes[] = 'Removed service: ' . $originalService->getName();
-            }
-            
-            $entityManager->flush();
-            
-            // Log the edit action
-            $currentUser = $this->getUser();
-            $currentUserName = $currentUser ? $currentUser->getUserIdentifier() : 'Unknown';
-            
-            // Use standardized action names
-            $activitylogger->log(
-                'Edited Order',
-                'Order ID: ' . $order->getId() . 
-                ' | Updated by: ' . $currentUserName .
-                ($changes ? ' | Changes: ' . implode(', ', $changes) : '')
-            );
-
-            $this->addFlash('success', 'Order updated successfully! Inventory adjusted accordingly.');
-            return $this->redirectToRoute('app_orders_index', [], Response::HTTP_SEE_OTHER);
         }
-
+        
         return $this->render('orders/edit.html.twig', [
             'order' => $order,
             'form' => $form->createView(),
             'products' => $products,
             'services' => $services,
-            'originalProduct' => $originalProduct,
-            'originalService' => $originalService,
         ]);
     }
 
-    #[Route('/{id}', name: 'app_orders_delete', methods: ['POST'])]
-    public function delete(Request $request, Orders $order, EntityManagerInterface $entityManager, ActivityLogger $activitylogger): Response
+    #[Route('/{id}', name: 'app_orders_show', methods: ['GET'])]
+    public function show(Orders $order): Response
     {
-        $this->checkOrderAccess($order, 'delete');
+        // Check if user is logged in
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         
-        if ($this->isCsrfTokenValid('delete'.$order->getId(), $request->getPayload()->getString('_token'))) {
-            // Store order details before deletion for logging
-            $orderId = $order->getId();
-            $orderUser = $order->getUser();
-            $userName = $orderUser ? $orderUser->getUserIdentifier() : 'Unknown';
-            $product = $order->getProductId() ? $order->getProductId()->getName() : 'None';
-            $service = $order->getServiceId() ? $order->getServiceId()->getName() : 'None';
-            
-            // Return product quantity if order had a product
-            $productEntity = $order->getProductId();
-            if ($productEntity) {
-                $productEntity->setQuantity($productEntity->getQuantity() + 1);
-                $entityManager->persist($productEntity);
-            }
-            
-            $entityManager->remove($order);
-            $entityManager->flush();
-            
-            // Get current user
-            $currentUser = $this->getUser();
-            $currentUserName = $currentUser ? $currentUser->getUserIdentifier() : 'Unknown';
-            
-            // Use standardized action names
-            $activitylogger->log(
-                'Deleted Order',
-                'Order ID: ' . $orderId . 
-                ' | Product: ' . $product . 
-                ' | Service: ' . $service .
-                ' | User: ' . $userName .
-                ' | Deleted by: ' . $currentUserName
-            );
+        // Check if user has permission to view this order
+        $this->checkOrderAccess($order, 'view');
+        
+        return $this->render('orders/show.html.twig', [
+            'order' => [
+                'id' => $order->getId(),
 
-            $this->addFlash('success', 'Order deleted successfully!');
-        }
+                // USER - use snapshot if user is deleted
+                'userName' => $order->getUser()
+                    ? $order->getUser()->getUsername()
+                    : null,
+                
+                'userNameSnapshot' => $order->getUserNameSnapshot(),
 
-        return $this->redirectToRoute('app_orders_index', [], Response::HTTP_SEE_OTHER);
+                // CREATED BY
+                'createdBy' => $order->getCreatedBy()
+                    ? $order->getCreatedBy()->getUsername()
+                    : 'N/A',
+
+                // PRODUCT - use snapshot if product is deleted
+                'productName' => $order->getProductId()
+                    ? $order->getProductId()->getName()
+                    : null,
+                
+                'productNameSnapshot' => $order->getProductNameSnapshot(),
+
+                // SERVICE - use snapshot if service is deleted
+                'serviceName' => $order->getServiceId()
+                    ? $order->getServiceId()->getName()
+                    : null,
+                
+                'serviceNameSnapshot' => $order->getServiceNameSnapshot(),
+
+                // CATEGORY - use snapshot if category is deleted
+                'categoryName' => $order->getCategoryId()
+                    ? $order->getCategoryId()->getCategoryName()
+                    : null,
+                
+                'categoryNameSnapshot' => $order->getCategoryNameSnapshot(),
+
+                'price' => $order->getPrice(),
+                'quantity' => $order->getQuantity(),
+                'orderCreated' => $order->getOrderCreated(),
+            ],
+        ]);
     }
 
+    #[Route('/delete/{id}', name: 'app_orders_delete', methods: ['POST'])]
+    public function delete(Request $request, Orders $order, EntityManagerInterface $em): Response
+    {
+        // Check if user is logged in
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        
+        // Check if user has permission to delete this order
+        $this->checkOrderAccess($order, 'delete');
+        
+        if ($this->isCsrfTokenValid('delete' . $order->getId(), $request->request->get('_token'))) {
+            try {
+                // If it's a product order, restore the quantity
+                if ($order->getProductId()) {
+                    $product = $order->getProductId();
+                    $product->setQuantity($product->getQuantity() + $order->getQuantity());
+                    $em->persist($product);
+                }
+                
+                $em->remove($order);
+                $em->flush();
+                
+                $this->addFlash('success', 'Order deleted successfully!');
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Error deleting order: ' . $e->getMessage());
+            }
+        }
+
+        return $this->redirectToRoute('app_orders_index');
+    }
+
+    /**
+     * Check if the current user has access to the order
+     */
     private function checkOrderAccess(Orders $order, string $action = 'view'): void
     {
+        // Admin has full access to everything
         if ($this->isGranted('ROLE_ADMIN')) {
             return;
         }
 
+        // Check if user is authenticated
         if (!$this->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw new AccessDeniedException('You must be logged in to access this resource.');
         }
 
         $currentUser = $this->getUser();
-        $orderUser = $order->getUser();
         
+        // Staff can access orders they created or orders assigned to them
         if ($this->isGranted('ROLE_STAFF')) {
-            if ($action === 'view') {
+            $orderCreator = $order->getCreatedBy();
+            $orderUser = $order->getUser();
+            
+            // Staff can access orders they created
+            if ($orderCreator && $currentUser === $orderCreator) {
                 return;
             }
             
-            if ($action === 'edit' || $action === 'delete') {
-                if (!$currentUser || !$orderUser) {
-                    throw new AccessDeniedException('You do not have permission to ' . $action . ' this order.');
-                }
+            // Staff can access orders assigned to customers (if they placed the order for a customer)
+            if ($orderUser && $currentUser === $orderUser) {
                 return;
             }
+            
+            throw new AccessDeniedException('You can only ' . $action . ' orders that you created or are assigned to you.');
         }
 
+        // Regular users can only access their own orders
         if ($this->isGranted('ROLE_USER')) {
-            if (!$currentUser || !$orderUser) {
-                throw new AccessDeniedException('You can only ' . $action . ' your own orders.');
-            }
+            $orderUser = $order->getUser();
             
-            if ($currentUser === $orderUser) {
+            if ($orderUser && $currentUser === $orderUser) {
                 return;
             }
             
             throw new AccessDeniedException('You can only ' . $action . ' your own orders.');
         }
 
+        // For any other roles, deny access
         throw new AccessDeniedException('You do not have permission to ' . $action . ' orders.');
     }
 }

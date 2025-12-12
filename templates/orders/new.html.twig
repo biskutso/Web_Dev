@@ -22,7 +22,16 @@
             <div class="w-full max-w-7xl">
                 <!-- Flash Messages -->
                 <div class="mb-8">
-                    {% include 'admin/flashmessage.html.twig' %}
+                    {% for message in app.flashes('success') %}
+                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                    {% for message in app.flashes('error') %}
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
                 </div>
 
                 <!-- Order Form Section -->
@@ -76,6 +85,15 @@
                                 <input type="hidden" id="user-select" name="selected_user" value="{{ app.user.id }}">
                             </div>
                         {% endif %}
+
+                        <!-- Hidden Form Fields -->
+                        <div class="hidden">
+                            {{ form_widget(form.selectedItem) }}
+                            {{ form_widget(form.itemType) }}
+                            {{ form_widget(form.price) }}
+                            {{ form_widget(form.quantity) }}
+                            {{ form_widget(form.categoryId) }}
+                        </div>
 
                         <!-- Selected Item Display -->
                         <div id="selected-item-display" class="hidden p-6 bg-white rounded-xl border-2 border-[#C49A41] shadow-lg mb-8">
@@ -145,12 +163,6 @@
                             </div>
                         </div>
 
-                        {{ form_widget(form.selectedItem) }}
-                        {{ form_widget(form.itemType) }}
-                        {{ form_widget(form.price) }}
-                        {{ form_widget(form.quantity) }}
-                        {{ form_widget(form.categoryId) }}
-
                         <div class="pt-8 text-center">
                             <button type="submit" id="submit-btn" disabled
                                     class="bg-[#C49A41] hover:bg-[#b38734] transition text-black font-semibold py-4 px-16 rounded-full text-lg disabled:opacity-50 disabled:cursor-not-allowed">
@@ -178,6 +190,7 @@
                                                  data-name="{{ product.name }}"
                                                  data-price="{{ product.price }}"
                                                  data-category="{{ product.category ? product.category.categoryname : 'N/A' }}"
+                                                 data-category-id="{{ product.category ? product.category.id : '' }}"
                                                  data-category-type="{{ product.category ? product.category.type.value|capitalize : 'N/A' }}"
                                                  data-quantity="{{ product.quantity }}">
                                                 <div class="p-6">
@@ -244,6 +257,7 @@
                                              data-name="{{ service.name }}"
                                              data-price="{{ service.price }}"
                                              data-category="{{ service.category ? service.category.categoryname : 'N/A' }}"
+                                             data-category-id="{{ service.category ? service.category.id : '' }}"
                                              data-category-type="{{ service.category ? service.category.type.value|capitalize : 'N/A' }}"
                                              data-quantity="N/A">
                                             <div class="p-6">
@@ -322,6 +336,8 @@
         const selectedItemField = document.querySelector('#{{ form.selectedItem.vars.id }}');
         const itemTypeField = document.querySelector('#{{ form.itemType.vars.id }}');
         const priceField = document.querySelector('#{{ form.price.vars.id }}');
+        const quantityField = document.querySelector('#{{ form.quantity.vars.id }}');
+        const categoryIdField = document.querySelector('#{{ form.categoryId.vars.id }}');
         const userSelect = document.getElementById('user-select');
         const submitBtn = document.getElementById('submit-btn');
         const selectedItemDisplay = document.getElementById('selected-item-display');
@@ -385,6 +401,8 @@
             selectedItemField.value = card.dataset.itemId;
             itemTypeField.value = card.dataset.itemType;
             priceField.value = card.dataset.price;
+            categoryIdField.value = card.dataset.categoryId || '';
+            quantityField.value = 1; // Default quantity
             
             // Update display
             selectedItemName.textContent = card.dataset.name;
@@ -405,7 +423,10 @@
             
             // Show selected item display with animation
             selectedItemDisplay.classList.remove('hidden');
-            selectedItemDisplay.classList.add('animate-fade-in');
+            selectedItemDisplay.style.animation = 'none';
+            setTimeout(() => {
+                selectedItemDisplay.style.animation = 'fadeIn 0.5s ease-in-out';
+            }, 10);
             
             // Enable submit button if user is selected
             updateSubmitButton();
@@ -431,10 +452,11 @@
             selectedItemField.value = '';
             itemTypeField.value = '';
             priceField.value = '';
+            categoryIdField.value = '';
+            quantityField.value = 1;
             
             // Hide selected item display
             selectedItemDisplay.classList.add('hidden');
-            selectedItemDisplay.classList.remove('animate-fade-in');
             
             // Disable submit button
             submitBtn.disabled = true;
@@ -491,14 +513,30 @@
                 customerName = selectedOption.text + "'s";
             }
             
+            // Get item type for confirmation
+            const itemType = itemTypeField.value === 'product' ? 'Product' : 'Service';
+            
             // Confirm submission
-            if (!confirm(`Are you sure you want to create this order for ${customerName} account?\n\nQuantity: 1\nTotal: $${parseFloat(priceField.value).toFixed(2)}`)) {
+            if (!confirm(`Are you sure you want to create this order for ${customerName} account?\n\nItem: ${selectedItemName.textContent}\nType: ${itemType}\nQuantity: 1\nTotal: $${parseFloat(priceField.value).toFixed(2)}`)) {
                 e.preventDefault();
             }
         });
         
         // Initialize submit button state
         updateSubmitButton();
+        
+        // Add CSS animation for fade-in
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(-10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .animate-fade-in {
+                animation: fadeIn 0.5s ease-in-out;
+            }
+        `;
+        document.head.appendChild(style);
     });
     </script>
 {% endblock %}

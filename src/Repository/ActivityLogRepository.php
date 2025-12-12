@@ -17,7 +17,7 @@ class ActivityLogRepository extends ServiceEntityRepository
     }
 
     // Add this method to get recent logs
-    public function findRecentLogs(int $limit = 3): array
+    public function findRecentLogs(int $limit = 4): array
     {
         return $this->createQueryBuilder('l')
             ->orderBy('l.datetime', 'DESC')

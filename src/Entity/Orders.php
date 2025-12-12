@@ -13,17 +13,24 @@ class Orders
     #[ORM\Column]
     private ?int $id = null;
 
+    // USER who owns the order — safe delete
     #[ORM\ManyToOne(inversedBy: 'orders')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true, onDelete: "SET NULL")]
     private ?User $user = null;
 
+    // PRODUCT — safe delete
     #[ORM\ManyToOne(inversedBy: 'orders')]
+    #[ORM\JoinColumn(nullable: true, onDelete: "SET NULL")]
     private ?Products $productId = null;
 
+    // SERVICE — safe delete
     #[ORM\ManyToOne(inversedBy: 'orders')]
+    #[ORM\JoinColumn(nullable: true, onDelete: "SET NULL")]
     private ?Services $serviceId = null;
 
+    // CATEGORY — safe delete
     #[ORM\ManyToOne(inversedBy: 'orders')]
+    #[ORM\JoinColumn(nullable: true, onDelete: "SET NULL")]
     private ?Categories $categoryId = null;
 
     #[ORM\Column]
@@ -35,9 +42,28 @@ class Orders
     #[ORM\Column]
     private ?\DateTimeImmutable $order_created = null;
 
+    // USER who created the order — safe delete
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: true)]
+    #[ORM\JoinColumn(nullable: true, onDelete: "SET NULL")]
     private ?User $createdBy = null;
+
+    // SNAPSHOTS (persisted even if FK is deleted)
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $productNameSnapshot = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $serviceNameSnapshot = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $categoryNameSnapshot = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $userNameSnapshot = null;
+
+    public function __construct()
+    {
+        $this->order_created = new \DateTimeImmutable();
+    }
 
     public function getId(): ?int
     {
@@ -52,7 +78,6 @@ class Orders
     public function setUser(?User $user): static
     {
         $this->user = $user;
-
         return $this;
     }
 
@@ -64,7 +89,6 @@ class Orders
     public function setProductId(?Products $productId): static
     {
         $this->productId = $productId;
-
         return $this;
     }
 
@@ -76,7 +100,6 @@ class Orders
     public function setServiceId(?Services $serviceId): static
     {
         $this->serviceId = $serviceId;
-
         return $this;
     }
 
@@ -88,7 +111,6 @@ class Orders
     public function setCategoryId(?Categories $categoryId): static
     {
         $this->categoryId = $categoryId;
-
         return $this;
     }
 
@@ -100,7 +122,6 @@ class Orders
     public function setPrice(int $price): static
     {
         $this->price = $price;
-
         return $this;
     }
 
@@ -112,7 +133,6 @@ class Orders
     public function setQuantity(int $quantity): static
     {
         $this->quantity = $quantity;
-
         return $this;
     }
 
@@ -124,13 +144,7 @@ class Orders
     public function setOrderCreated(\DateTimeImmutable $order_created): static
     {
         $this->order_created = $order_created;
-
         return $this;
-    }
-
-    public function __construct()
-    {
-        $this->order_created = new \DateTimeImmutable();
     }
 
     public function getCreatedBy(): ?User
@@ -141,7 +155,52 @@ class Orders
     public function setCreatedBy(?User $createdBy): static
     {
         $this->createdBy = $createdBy;
+        return $this;
+    }
 
+    // SNAPSHOT GETTERS/SETTERS
+
+    public function getProductNameSnapshot(): ?string
+    {
+        return $this->productNameSnapshot;
+    }
+
+    public function setProductNameSnapshot(?string $productNameSnapshot): static
+    {
+        $this->productNameSnapshot = $productNameSnapshot;
+        return $this;
+    }
+
+    public function getServiceNameSnapshot(): ?string
+    {
+        return $this->serviceNameSnapshot;
+    }
+
+    public function setServiceNameSnapshot(?string $serviceNameSnapshot): static
+    {
+        $this->serviceNameSnapshot = $serviceNameSnapshot;
+        return $this;
+    }
+
+    public function getCategoryNameSnapshot(): ?string
+    {
+        return $this->categoryNameSnapshot;
+    }
+
+    public function setCategoryNameSnapshot(?string $categoryNameSnapshot): static
+    {
+        $this->categoryNameSnapshot = $categoryNameSnapshot;
+        return $this;
+    }
+
+    public function getUserNameSnapshot(): ?string
+    {
+        return $this->userNameSnapshot;
+    }
+
+    public function setUserNameSnapshot(?string $userNameSnapshot): static
+    {
+        $this->userNameSnapshot = $userNameSnapshot;
         return $this;
     }
 }

@@ -39,7 +39,15 @@
                         </div>
                         <div class="text-center">
                             <div class="text-sm font-medium text-gray-600">Customer</div>
-                            <div class="text-lg font-semibold text-gray-900">{{ order.user.username }}</div>
+                            <div class="text-lg font-semibold text-gray-900">
+                                {% if order.user %}
+                                    {{ order.user.username }}
+                                {% elseif order.userNameSnapshot %}
+                                    {{ order.userNameSnapshot }} <span class="text-xs text-gray-500">(Deleted)</span>
+                                {% else %}
+                                    Unknown Customer
+                                {% endif %}
+                            </div>
                         </div>
                         <div class="text-center">
                             <div class="text-sm font-medium text-gray-600">Order Date</div>
@@ -58,10 +66,12 @@
                                     </svg>
                                     <span class="text-sm font-medium text-gray-600">Type:</span>
                                     <span class="ml-2 font-semibold text-gray-900">
-                                        {% if order.productId %}
+                                        {% if order.productId or order.productNameSnapshot %}
                                             <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">Product</span>
-                                        {% else %}
+                                        {% elseif order.serviceId or order.serviceNameSnapshot %}
                                             <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">Service</span>
+                                        {% else %}
+                                            <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs">Unknown</span>
                                         {% endif %}
                                     </span>
                                 </div>
@@ -71,7 +81,18 @@
                                     </svg>
                                     <span class="text-sm font-medium text-gray-600">Name:</span>
                                     <span class="ml-2 font-semibold text-gray-900">
-                                        {{ order.productId ? order.productId.name : order.serviceId.name }}
+                                        {# LINE 74 FIXED: Use snapshot if entity is null #}
+                                        {% if order.productId %}
+                                            {{ order.productId.name }}
+                                        {% elseif order.productNameSnapshot %}
+                                            {{ order.productNameSnapshot }} <span class="text-xs text-gray-500">(Deleted)</span>
+                                        {% elseif order.serviceId %}
+                                            {{ order.serviceId.name }}
+                                        {% elseif order.serviceNameSnapshot %}
+                                            {{ order.serviceNameSnapshot }} <span class="text-xs text-gray-500">(Deleted)</span>
+                                        {% else %}
+                                            Unknown Item
+                                        {% endif %}
                                     </span>
                                 </div>
                             </div>
@@ -90,7 +111,13 @@
                                     </svg>
                                     <span class="text-sm font-medium text-gray-600">Category:</span>
                                     <span class="ml-2 font-semibold text-gray-900">
-                                        {{ order.categoryId ? order.categoryId.categoryname : 'N/A' }}
+                                        {% if order.categoryId %}
+                                            {{ order.categoryId.categoryname }}
+                                        {% elseif order.categoryNameSnapshot %}
+                                            {{ order.categoryNameSnapshot }} <span class="text-xs text-gray-500">(Deleted)</span>
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
                                     </span>
                                 </div>
                             </div>
@@ -127,7 +154,15 @@
                                 </svg>
                                 <div>
                                     <p class="text-sm text-blue-800 font-medium">Customer:</p>
-                                    <p class="text-lg font-semibold text-blue-900">{{ order.user.username }}</p>
+                                    <p class="text-lg font-semibold text-blue-900">
+                                        {% if order.user %}
+                                            {{ order.user.username }}
+                                        {% elseif order.userNameSnapshot %}
+                                            {{ order.userNameSnapshot }} <span class="text-xs text-gray-500">(Deleted)</span>
+                                        {% else %}
+                                            Unknown Customer
+                                        {% endif %}
+                                    </p>
                                 </div>
                             </div>
                             <p class="text-sm text-blue-600 mt-2">This cannot be changed for existing orders.</p>
@@ -141,11 +176,28 @@
                                 </svg>
                                 <div>
                                     <p class="text-sm text-gray-800 font-medium">Quantity:</p>
-                                    <p class="text-lg font-semibold text-gray-900">1</p>
+                                    <p class="text-lg font-semibold text-gray-900">{{ order.quantity }}</p>
                                 </div>
                             </div>
-                            <p class="text-sm text-gray-600 mt-2">Quantity is always 1 per order and cannot be changed.</p>
+                            <p class="text-sm text-gray-600 mt-2">Quantity cannot be changed in edit mode.</p>
                         </div>
+
+                        <!-- Warning if current item is deleted -->
+                        {% if (order.productId is null and order.productNameSnapshot) or (order.serviceId is null and order.serviceNameSnapshot) %}
+                        <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                            <div class="flex items-start">
+                                <svg class="w-5 h-5 text-yellow-600 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                                <div>
+                                    <p class="text-sm text-yellow-800 font-medium">Note:</p>
+                                    <p class="text-sm text-yellow-700 mt-1">
+                                        The original item in this order has been deleted. Please select a new item from below.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
 
                         <!-- Items Selection Instructions -->
                         <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
@@ -452,7 +504,7 @@
                                 <li>Only one item can be selected at a time (product OR service)</li>
                                 <li>The selected item will appear in a display card</li>
                                 <li>Click "Update Order" to save your changes</li>
-                                <li>Quantity is fixed at 1 per order</li>
+                                <li>Quantity is fixed at {{ order.quantity }} per order</li>
                                 <li>The customer for this order cannot be changed</li>
                             </ul>
                         </div>
@@ -497,7 +549,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const originalOrder = {
         productId: {{ order.productId ? order.productId.id : 'null' }},
         serviceId: {{ order.serviceId ? order.serviceId.id : 'null' }},
-        itemType: '{{ order.productId ? "product" : (order.serviceId ? "service" : "none") }}'
+        productNameSnapshot: '{{ order.productNameSnapshot|default('')|escape('js') }}',
+        serviceNameSnapshot: '{{ order.serviceNameSnapshot|default('')|escape('js') }}',
+        itemType: '{{ order.productId ? "product" : (order.serviceId ? "service" : (order.productNameSnapshot ? "product" : (order.serviceNameSnapshot ? "service" : "none"))) }}',
+        quantity: {{ order.quantity }}
     };
     
     let selectedProductCard = null;
@@ -540,18 +595,28 @@ document.addEventListener('DOMContentLoaded', function() {
         let originalName = '';
         let originalType = '';
         
-        if (originalOrder.itemType === 'product' && originalOrder.productId) {
-            // Find original product name
-            const originalProductCard = document.querySelector(`.product-card[data-item-id="${originalOrder.productId}"]`);
-            if (originalProductCard) {
-                originalName = originalProductCard.dataset.name;
+        if (originalOrder.itemType === 'product') {
+            if (originalOrder.productId) {
+                // Find original product name
+                const originalProductCard = document.querySelector(`.product-card[data-item-id="${originalOrder.productId}"]`);
+                if (originalProductCard) {
+                    originalName = originalProductCard.dataset.name;
+                    originalType = 'product';
+                }
+            } else if (originalOrder.productNameSnapshot) {
+                originalName = originalOrder.productNameSnapshot;
                 originalType = 'product';
             }
-        } else if (originalOrder.itemType === 'service' && originalOrder.serviceId) {
-            // Find original service name
-            const originalServiceCard = document.querySelector(`.service-card[data-item-id="${originalOrder.serviceId}"]`);
-            if (originalServiceCard) {
-                originalName = originalServiceCard.dataset.name;
+        } else if (originalOrder.itemType === 'service') {
+            if (originalOrder.serviceId) {
+                // Find original service name
+                const originalServiceCard = document.querySelector(`.service-card[data-item-id="${originalOrder.serviceId}"]`);
+                if (originalServiceCard) {
+                    originalName = originalServiceCard.dataset.name;
+                    originalType = 'service';
+                }
+            } else if (originalOrder.serviceNameSnapshot) {
+                originalName = originalOrder.serviceNameSnapshot;
                 originalType = 'service';
             }
         }
@@ -617,18 +682,28 @@ document.addEventListener('DOMContentLoaded', function() {
         let originalName = '';
         let originalType = '';
         
-        if (originalOrder.itemType === 'product' && originalOrder.productId) {
-            // Find original product name
-            const originalProductCard = document.querySelector(`.product-card[data-item-id="${originalOrder.productId}"]`);
-            if (originalProductCard) {
-                originalName = originalProductCard.dataset.name;
+        if (originalOrder.itemType === 'product') {
+            if (originalOrder.productId) {
+                // Find original product name
+                const originalProductCard = document.querySelector(`.product-card[data-item-id="${originalOrder.productId}"]`);
+                if (originalProductCard) {
+                    originalName = originalProductCard.dataset.name;
+                    originalType = 'product';
+                }
+            } else if (originalOrder.productNameSnapshot) {
+                originalName = originalOrder.productNameSnapshot;
                 originalType = 'product';
             }
-        } else if (originalOrder.itemType === 'service' && originalOrder.serviceId) {
-            // Find original service name
-            const originalServiceCard = document.querySelector(`.service-card[data-item-id="${originalOrder.serviceId}"]`);
-            if (originalServiceCard) {
-                originalName = originalServiceCard.dataset.name;
+        } else if (originalOrder.itemType === 'service') {
+            if (originalOrder.serviceId) {
+                // Find original service name
+                const originalServiceCard = document.querySelector(`.service-card[data-item-id="${originalOrder.serviceId}"]`);
+                if (originalServiceCard) {
+                    originalName = originalServiceCard.dataset.name;
+                    originalType = 'service';
+                }
+            } else if (originalOrder.serviceNameSnapshot) {
+                originalName = originalOrder.serviceNameSnapshot;
                 originalType = 'service';
             }
         }
@@ -709,15 +784,15 @@ document.addEventListener('DOMContentLoaded', function() {
     function showInventoryWarning(fromType, fromName, toType, toName) {
         if (fromType === 'product' && toType === 'product') {
             // Changing from one product to another
-            inventoryMessage.textContent = `Changing from "${fromName}" to "${toName}". The quantity of "${fromName}" will be restored (+1), and "${toName}" quantity will be reduced by 1 (-1).`;
+            inventoryMessage.textContent = `Changing from "${fromName}" to "${toName}". The quantity of "${fromName}" will be restored (+${originalOrder.quantity}), and "${toName}" quantity will be reduced by ${originalOrder.quantity} (-${originalOrder.quantity}).`;
             inventoryWarning.classList.remove('hidden');
         } else if (fromType === 'product' && toType === 'service') {
             // Changing from product to service
-            inventoryMessage.textContent = `Changing from product "${fromName}" to service "${toName}". The quantity of "${fromName}" will be restored (+1).`;
+            inventoryMessage.textContent = `Changing from product "${fromName}" to service "${toName}". The quantity of "${fromName}" will be restored (+${originalOrder.quantity}).`;
             inventoryWarning.classList.remove('hidden');
         } else if (fromType === 'service' && toType === 'product') {
             // Changing from service to product
-            inventoryMessage.textContent = `Changing from service "${fromName}" to product "${toName}". The product quantity will be reduced by 1 (-1).`;
+            inventoryMessage.textContent = `Changing from service "${fromName}" to product "${toName}". The product quantity will be reduced by ${originalOrder.quantity} (-${originalOrder.quantity}).`;
             inventoryWarning.classList.remove('hidden');
         } else if (fromType === 'service' && toType === 'service') {
             // Changing from one service to another
@@ -725,7 +800,7 @@ document.addEventListener('DOMContentLoaded', function() {
             inventoryWarning.classList.remove('hidden');
         } else if (fromType === '' && toType === 'product') {
             // No original item (shouldn't happen in edit, but just in case)
-            inventoryMessage.textContent = `Selecting product "${toName}". Product quantity will be reduced by 1 (-1).`;
+            inventoryMessage.textContent = `Selecting product "${toName}". Product quantity will be reduced by ${originalOrder.quantity} (-${originalOrder.quantity}).`;
             inventoryWarning.classList.remove('hidden');
         } else {
             inventoryWarning.classList.add('hidden');
@@ -772,9 +847,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Additional validation for product quantity
         if (itemTypeField.value === 'product' && selectedProductCard) {
             const quantity = parseInt(selectedProductCard.dataset.quantity);
-            if (quantity <= 0) {
+            if (quantity < originalOrder.quantity) {
                 e.preventDefault();
-                alert('This product is out of stock. Please select a different item.');
+                alert(`This product only has ${quantity} in stock, but the order requires ${originalOrder.quantity}. Please select a different item.`);
                 return;
             }
         }
@@ -787,23 +862,23 @@ document.addEventListener('DOMContentLoaded', function() {
         // Determine if inventory will change
         if (originalOrder.itemType === 'product' && selectedServiceId) {
             // Changing from product to service - inventory will be restored
-            const originalProductCard = document.querySelector(`.product-card[data-item-id="${originalOrder.productId}"]`);
-            if (originalProductCard) {
-                inventoryChangeMessage = `\n• Quantity of "${originalProductCard.dataset.name}" will be restored (+1)`;
+            if (originalOrder.productId || originalOrder.productNameSnapshot) {
+                inventoryChangeMessage = `\n• Quantity of "${originalOrder.productNameSnapshot || 'Deleted Product'}" will be restored (+${originalOrder.quantity})`;
             }
         } else if (originalOrder.itemType === 'product' && selectedProductId && parseInt(selectedProductId) !== originalOrder.productId) {
             // Changing from one product to another
-            const originalProductCard = document.querySelector(`.product-card[data-item-id="${originalOrder.productId}"]`);
+            if (originalOrder.productId || originalOrder.productNameSnapshot) {
+                inventoryChangeMessage = `\n• Quantity of "${originalOrder.productNameSnapshot || 'Deleted Product'}" will be restored (+${originalOrder.quantity})`;
+            }
             const newProductCard = document.querySelector(`.product-card[data-item-id="${selectedProductId}"]`);
-            if (originalProductCard && newProductCard) {
-                inventoryChangeMessage = `\n• Quantity of "${originalProductCard.dataset.name}" will be restored (+1)`;
-                inventoryChangeMessage += `\n• Quantity of "${newProductCard.dataset.name}" will be reduced by 1 (-1)`;
+            if (newProductCard) {
+                inventoryChangeMessage += `\n• Quantity of "${newProductCard.dataset.name}" will be reduced by ${originalOrder.quantity} (-${originalOrder.quantity})`;
             }
         } else if (originalOrder.itemType === 'service' && selectedProductId) {
             // Changing from service to product
             const newProductCard = document.querySelector(`.product-card[data-item-id="${selectedProductId}"]`);
             if (newProductCard) {
-                inventoryChangeMessage = `\n• Quantity of "${newProductCard.dataset.name}" will be reduced by 1 (-1)`;
+                inventoryChangeMessage = `\n• Quantity of "${newProductCard.dataset.name}" will be reduced by ${originalOrder.quantity} (-${originalOrder.quantity})`;
             }
         } else if (originalOrder.itemType === 'product' && selectedProductId && parseInt(selectedProductId) === originalOrder.productId) {
             // Same product selected - no inventory change
@@ -813,9 +888,8 @@ document.addEventListener('DOMContentLoaded', function() {
             inventoryChangeMessage = `\n• No inventory changes (same service selected)`;
         } else if (originalOrder.itemType === 'service' && selectedServiceId && parseInt(selectedServiceId) !== originalOrder.serviceId) {
             // Changing from one service to another
-            const originalServiceCard = document.querySelector(`.service-card[data-item-id="${originalOrder.serviceId}"]`);
             const newServiceCard = document.querySelector(`.service-card[data-item-id="${selectedServiceId}"]`);
-            if (originalServiceCard && newServiceCard) {
+            if (newServiceCard) {
                 inventoryChangeMessage = `\n• No inventory changes (services don't affect inventory)`;
             }
         }

@@ -27,6 +27,7 @@ class OrdersType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        
         $builder
             ->add('selectedItem', HiddenType::class, [
                 'mapped' => false,
@@ -48,8 +49,27 @@ class OrdersType extends AbstractType
             ->add('categoryId', HiddenType::class, [
                 'required' => false,
                 'mapped' => false,
+            ])
+            // Add these for edit form - they'll be hidden but available
+            ->add('productId', EntityType::class, [
+                'class' => Products::class,
+                'choice_label' => 'name',
+                'placeholder' => 'Select a product',
+                'required' => false,
+                'label' => false,
+                'attr' => ['class' => 'hidden'],
+                'mapped' => true,
+            ])
+            ->add('serviceId', EntityType::class, [
+                'class' => Services::class,
+                'choice_label' => 'name',
+                'placeholder' => 'Select a service',
+                'required' => false,
+                'label' => false,
+                'attr' => ['class' => 'hidden'],
+                'mapped' => true,
             ]);
-        
+
         // Add fields for edit mode
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
             $order = $event->getData();

@@ -34,7 +34,7 @@ final class AdminController extends AbstractController
             'role_counts' => $roleCounts,
             'total_active_serv' => $servicesRepository->count(['status' => 'Active']),
             'total_active' => $userRepository->count(['status' => 'Active']),
-            'recent_logs' =>  $activityLogRepository->findRecentLogsWithUser(3),
+            'recent_logs' =>  $activityLogRepository->findRecentLogsWithUser(4),
             'controller_name' => 'AdminController',
         ]);
     }
