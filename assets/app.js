@@ -36,6 +36,7 @@ $(document).ready(function () {
   $('#categoriesTable').DataTable();
   $('#servicesTable').DataTable();
   $('#usersTable').DataTable();
+  $('#ordersTable').DataTable();
 });
 
 // ==========================
@@ -273,3 +274,188 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     }
 });
+
+// order
+ document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('order-form');
+        const selectedItemField = document.querySelector('#{{ form.selectedItem.vars.id }}');
+        const itemTypeField = document.querySelector('#{{ form.itemType.vars.id }}');
+        const priceField = document.querySelector('#{{ form.price.vars.id }}');
+        const userSelect = document.getElementById('user-select');
+        const submitBtn = document.getElementById('submit-btn');
+        const selectedItemDisplay = document.getElementById('selected-item-display');
+        const clearSelectionBtn = document.getElementById('clear-selection');
+        
+        // Display elements
+        const selectedItemName = document.getElementById('selected-item-name');
+        const selectedItemType = document.getElementById('selected-item-type');
+        const selectedItemCategory = document.getElementById('selected-item-category');
+        const selectedItemPrice = document.getElementById('selected-item-price');
+        const selectedItemQuantity = document.getElementById('selected-item-quantity');
+        
+        let selectedCard = null;
+        
+        // Handle item selection
+        document.querySelectorAll('.item-card1').forEach(card => {
+            const selectBtn = card.querySelector('.select-item-btn');
+            
+            selectBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                selectItem(card);
+            });
+            
+            card.addEventListener('click', function(e) {
+                if (!e.target.classList.contains('select-item-btn')) {
+                    selectItem(card);
+                }
+            });
+        });
+        
+        function selectItem(card) {
+            // Remove previous selection
+            if (selectedCard) {
+                selectedCard.classList.remove('border-[#C49A41]', 'ring-2', 'ring-[#C49A41]/20');
+                selectedCard.querySelector('.select-item-btn').classList.remove('from-blue-800', 'to-blue-900', 'from-purple-800', 'to-purple-900');
+                
+                const btn = selectedCard.querySelector('.select-item-btn');
+                if (selectedCard.dataset.itemType === 'product') {
+                    btn.classList.add('from-blue-600', 'to-blue-700');
+                } else {
+                    btn.classList.add('from-purple-600', 'to-purple-700');
+                }
+            }
+            
+            // Set new selection
+            card.classList.add('border-[#C49A41]', 'ring-2', 'ring-[#C49A41]/20');
+            
+            // Update button color
+            const btn = card.querySelector('.select-item-btn');
+            if (card.dataset.itemType === 'product') {
+                btn.classList.remove('from-blue-600', 'to-blue-700');
+                btn.classList.add('from-blue-800', 'to-blue-900');
+            } else {
+                btn.classList.remove('from-purple-600', 'to-purple-700');
+                btn.classList.add('from-purple-800', 'to-purple-900');
+            }
+            
+            selectedCard = card;
+            
+            // Update form fields
+            selectedItemField.value = card.dataset.itemId;
+            itemTypeField.value = card.dataset.itemType;
+            priceField.value = card.dataset.price;
+            
+            // Update display
+            selectedItemName.textContent = card.dataset.name;
+            selectedItemType.textContent = card.dataset.itemType.charAt(0).toUpperCase() + card.dataset.itemType.slice(1);
+            selectedItemCategory.textContent = card.dataset.category;
+            selectedItemPrice.textContent = '$' + parseFloat(card.dataset.price).toFixed(2);
+            selectedItemQuantity.textContent = card.dataset.quantity;
+            
+            // Show quantity warning for low quantity products
+            if (card.dataset.itemType === 'product') {
+                const quantity = parseInt(card.dataset.quantity);
+                if (quantity < 5) {
+                    selectedItemQuantity.classList.add('text-red-600', 'font-bold');
+                } else {
+                    selectedItemQuantity.classList.remove('text-red-600', 'font-bold');
+                }
+            }
+            
+            // Show selected item display with animation
+            selectedItemDisplay.classList.remove('hidden');
+            selectedItemDisplay.classList.add('animate-fade-in');
+            
+            // Enable submit button if user is selected
+            updateSubmitButton();
+        }
+        
+        // Handle clear selection
+        clearSelectionBtn.addEventListener('click', function() {
+            if (selectedCard) {
+                selectedCard.classList.remove('border-[#C49A41]', 'ring-2', 'ring-[#C49A41]/20');
+                selectedCard.querySelector('.select-item-btn').classList.remove('from-blue-800', 'to-blue-900', 'from-purple-800', 'to-purple-900');
+                
+                const btn = selectedCard.querySelector('.select-item-btn');
+                if (selectedCard.dataset.itemType === 'product') {
+                    btn.classList.add('from-blue-600', 'to-blue-700');
+                } else {
+                    btn.classList.add('from-purple-600', 'to-purple-700');
+                }
+                
+                selectedCard = null;
+            }
+            
+            // Clear form fields
+            selectedItemField.value = '';
+            itemTypeField.value = '';
+            priceField.value = '';
+            
+            // Hide selected item display
+            selectedItemDisplay.classList.add('hidden');
+            selectedItemDisplay.classList.remove('animate-fade-in');
+            
+            // Disable submit button
+            submitBtn.disabled = true;
+        });
+        
+        // Update submit button state based on user selection and item selection
+        function updateSubmitButton() {
+            if (userSelect) {
+                const userSelected = userSelect.value && userSelect.value !== '';
+                const itemSelected = selectedItemField.value && itemTypeField.value;
+                submitBtn.disabled = !(userSelected && itemSelected);
+            } else {
+                // For regular users, just check if item is selected
+                const itemSelected = selectedItemField.value && itemTypeField.value;
+                submitBtn.disabled = !itemSelected;
+            }
+        }
+        
+        // Handle user selection change
+        if (userSelect) {
+            userSelect.addEventListener('change', updateSubmitButton);
+        }
+        
+        // Form submission validation
+        form.addEventListener('submit', function(e) {
+            // Validate user selection for admin/staff
+            if (userSelect && (!userSelect.value || userSelect.value === '')) {
+                e.preventDefault();
+                alert('Please select a customer before submitting.');
+                return;
+            }
+            
+            // Validate item selection
+            if (!selectedItemField.value || !itemTypeField.value) {
+                e.preventDefault();
+                alert('Please select an item before submitting.');
+                return;
+            }
+            
+            // Additional validation for product quantity
+            if (itemTypeField.value === 'product' && selectedCard) {
+                const quantity = parseInt(selectedCard.dataset.quantity);
+                if (quantity <= 0) {
+                    e.preventDefault();
+                    alert('This product is out of stock. Please select a different item.');
+                    return;
+                }
+            }
+            
+            // Get customer name for confirmation message
+            let customerName = 'Your';
+            if (userSelect && userSelect.options[userSelect.selectedIndex]) {
+                const selectedOption = userSelect.options[userSelect.selectedIndex];
+                customerName = selectedOption.text + "'s";
+            }
+            
+            // Confirm submission
+            if (!confirm(`Are you sure you want to create this order for ${customerName} account?\n\nQuantity: 1\nTotal: $${parseFloat(priceField.value).toFixed(2)}`)) {
+                e.preventDefault();
+            }
+        });
+        
+        // Initialize submit button state
+        updateSubmitButton();
+    });

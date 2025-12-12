@@ -9,15 +9,17 @@
         {% if route == 'app_admin' %}
             Dashboard Overview
         {% elseif route starts with 'app_products_' %}
-            Products
+            Manage Products
         {% elseif route starts with 'app_categories_' %}
-            Categories
+            Manage Categories
         {% elseif route starts with 'app_user_' %}
-            Users
+            Manage Users
+        {% elseif route starts with 'app_orders_' %}
+            Manage Orders
         {% elseif route starts with 'app_services_' %}
-            Services
+            Manage Services
         {% elseif route starts with 'app_activity_logs' %}
-            Activity Logs
+            Manage Activity Logs
         {% elseif route starts with 'app_admin_account' %}
             Account Settings
         {% else %}
@@ -39,9 +41,12 @@
 
         <div class="relative">
             <button class="flex items-center space-x-2 text-gray-700 hover:text-[#C49A41] focus:outline-none">
+                {% set username = app.user.username %}
+                {% set initials = username|slice(0, 2)|upper %}
                 <img class="h-8 w-8 rounded-full object-cover"
-                     src="https://api.dicebear.com/7.x/initials/svg?seed=AD" alt="Admin Avatar">
-                <span class="font-montserrat">{{ app.user.userIdentifier|capitalize }}</span>
+                     src="https://api.dicebear.com/7.x/initials/svg?seed={{ initials }}"
+                     alt="{{ username|capitalize }} Avatar">
+                <span class="font-montserrat">{{ username|capitalize }}</span>
                 <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                      xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

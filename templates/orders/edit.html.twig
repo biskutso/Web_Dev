@@ -1,0 +1,871 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Order{% endblock %}
+
+{% block body %}
+{% include 'admin/sidebar.html.twig' %}
+
+<div class="flex-1 flex flex-col overflow-hidden">
+
+    {% include 'admin/header.html.twig' %}
+
+    <!-- Page Header -->
+    <section class="hero-section2 bg-gradient-to-r from-gray-900 to-black relative h-48">
+        <div class="hero-content absolute inset-0 bg-black/70 flex flex-col justify-center items-center">
+            <h1 class="text-3xl md:text-4xl font-cinzel font-bold text-white mb-4">EDIT ORDER #{{ order.id }}</h1>
+            <p class="text-lg text-gray-300 font-montserrat">
+                Update order item selection
+            </p>
+        </div>
+    </section>
+
+    <div class="flex justify-center p-8 mb-10">
+        <div class="w-full max-w-4xl">
+            <!-- Flash Messages -->
+            <div class="mb-8">
+                {% include 'admin/flashmessage.html.twig' %}
+            </div>
+
+            <!-- Main Content Card -->
+            <div class="bg-white p-8 rounded-2xl shadow-lg">
+                <h1 class="text-3xl font-cinzel font-bold mb-6 text-gray-800 text-center">Edit Order</h1>
+
+                <!-- Current Order Info -->
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200 mb-8">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="text-center">
+                            <div class="text-sm font-medium text-gray-600">Order ID</div>
+                            <div class="text-2xl font-bold text-gray-900">#{{ order.id }}</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-sm font-medium text-gray-600">Customer</div>
+                            <div class="text-lg font-semibold text-gray-900">{{ order.user.username }}</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-sm font-medium text-gray-600">Order Date</div>
+                            <div class="text-lg font-semibold text-gray-900">{{ order.orderCreated|date('M d, Y') }}</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Current Item Display -->
+                    <div class="mt-6 bg-white p-6 rounded-lg border border-gray-300">
+                        <h3 class="text-xl font-cinzel font-bold text-gray-900 mb-4">Current Item</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 text-gray-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="text-sm font-medium text-gray-600">Type:</span>
+                                    <span class="ml-2 font-semibold text-gray-900">
+                                        {% if order.productId %}
+                                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">Product</span>
+                                        {% else %}
+                                            <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">Service</span>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 text-gray-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
+                                    </svg>
+                                    <span class="text-sm font-medium text-gray-600">Name:</span>
+                                    <span class="ml-2 font-semibold text-gray-900">
+                                        {{ order.productId ? order.productId.name : order.serviceId.name }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 text-gray-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="text-sm font-medium text-gray-600">Price:</span>
+                                    <span class="ml-2 font-bold text-lg text-[#C49A41]">₱{{ order.price|number_format(2) }}</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 text-gray-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="text-sm font-medium text-gray-600">Category:</span>
+                                    <span class="ml-2 font-semibold text-gray-900">
+                                        {{ order.categoryId ? order.categoryId.categoryname : 'N/A' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edit Form Card -->
+                <div class="bg-gray-50 p-8 rounded-xl shadow-md mb-8">
+                    <h2 class="text-2xl font-cinzel font-bold mb-6 text-gray-800 text-center">Update Order Details</h2>
+                    
+                    {{ form_start(form, {'attr': {'class': 'space-y-6', 'id': 'order-edit-form'}}) }}
+                    
+                        <!-- ALL FORM FIELDS ARE HIDDEN -->
+                        <div class="hidden">
+                            <!-- Hidden fields -->
+                            {{ form_widget(form.selectedItem) }}
+                            {{ form_widget(form.itemType) }}
+                            {{ form_widget(form.price) }}
+                            {{ form_widget(form.quantity) }}
+                            {{ form_widget(form.categoryId) }}
+                            
+                            <!-- Hidden dropdowns -->
+                            {{ form_widget(form.productId) }}
+                            {{ form_widget(form.serviceId) }}
+                        </div>
+
+                        <!-- Information Sections -->
+                        <!-- Customer Info (Read-only) -->
+                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 text-blue-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                                </svg>
+                                <div>
+                                    <p class="text-sm text-blue-800 font-medium">Customer:</p>
+                                    <p class="text-lg font-semibold text-blue-900">{{ order.user.username }}</p>
+                                </div>
+                            </div>
+                            <p class="text-sm text-blue-600 mt-2">This cannot be changed for existing orders.</p>
+                        </div>
+
+                        <!-- Quantity Info (Read-only) -->
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-300">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 text-gray-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"/>
+                                </svg>
+                                <div>
+                                    <p class="text-sm text-gray-800 font-medium">Quantity:</p>
+                                    <p class="text-lg font-semibold text-gray-900">1</p>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-2">Quantity is always 1 per order and cannot be changed.</p>
+                        </div>
+
+                        <!-- Items Selection Instructions -->
+                        <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                            <div class="flex items-start">
+                                <svg class="w-5 h-5 text-yellow-600 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                </svg>
+                                <div>
+                                    <p class="text-sm text-yellow-800 font-medium">Select a new item below:</p>
+                                    <p class="text-sm text-yellow-700 mt-1">Choose from the available products or services displayed in the sections below.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="pt-6">
+                            <button data-turbo="false" type="submit" id="submit-btn" disabled
+                                    class="w-full px-6 py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 cursor-pointer font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                                ✅ Update Order
+                            </button>
+                        </div>
+
+                    {{ form_end(form) }}
+                </div>
+
+                <!-- Products Selection Section -->
+                <section class="bg-white py-8 rounded-2xl shadow-lg mb-8">
+                    <div class="max-w-7xl mx-auto px-6">
+                        <h2 class="text-2xl font-cinzel font-bold text-gray-900 mb-6 text-center">AVAILABLE PRODUCTS</h2>
+                        
+                        <!-- Selected Product Display -->
+                        <div id="selected-product-display" class="hidden mb-8 p-6 bg-white rounded-xl border-2 border-[#C49A41] shadow-lg">
+                            <div class="flex justify-between items-start">
+                                <div class="w-full">
+                                    <h3 class="text-xl font-cinzel font-bold text-gray-900 mb-4">Selected Product</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div class="space-y-3">
+                                            <div class="flex items-center">
+                                                <svg class="w-5 h-5 text-[#C49A41] mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
+                                                </svg>
+                                                <div>
+                                                    <span class="text-sm font-medium text-gray-600">Name:</span>
+                                                    <span id="selected-product-name" class="ml-2 text-gray-900 font-semibold">-</span>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <svg class="w-5 h-5 text-[#C49A41] mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                </svg>
+                                                <div>
+                                                    <span class="text-sm font-medium text-gray-600">Type:</span>
+                                                    <span class="ml-2 text-gray-900 font-semibold">Product</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="space-y-3">
+                                            <div class="flex items-center">
+                                                <svg class="w-5 h-5 text-[#C49A41] mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
+                                                </svg>
+                                                <div>
+                                                    <span class="text-sm font-medium text-gray-600">Price:</span>
+                                                    <span id="selected-product-price" class="ml-2 font-bold text-lg text-[#C49A41]">₱0.00</span>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <svg class="w-5 h-5 text-[#C49A41] mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+                                                </svg>
+                                                <div>
+                                                    <span class="text-sm font-medium text-gray-600">Category:</span>
+                                                    <span id="selected-product-category" class="ml-2 text-gray-900 font-semibold">-</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-4 flex items-center">
+                                        <svg class="w-5 h-5 text-[#C49A41] mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <div>
+                                            <span class="text-sm font-medium text-gray-600">Stock Available:</span>
+                                            <span id="selected-product-stock" class="ml-2 text-gray-900 font-semibold">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" id="clear-product-selection" 
+                                        class="ml-6 text-red-600 hover:text-red-800 font-semibold flex items-center">
+                                    <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+                        
+                        {% if products|length > 0 %}
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {% for product in products %}
+                                    <div class="product-card bg-white rounded-xl shadow-md border border-gray-200 hover:shadow-xl transition-all duration-300 cursor-pointer group"
+                                         data-item-id="{{ product.id }}"
+                                         data-name="{{ product.name }}"
+                                         data-price="{{ product.price }}"
+                                         data-category="{{ product.category ? product.category.categoryname : 'N/A' }}"
+                                         data-quantity="{{ product.quantity }}"
+                                         data-description="{{ product.description|default('No description')|slice(0, 100) }}">
+                                        <div class="p-5">
+                                            <div class="flex justify-between items-start mb-3">
+                                                <h3 class="text-lg font-cinzel font-bold text-gray-900 group-hover:text-[#C49A41] transition-colors">{{ product.name }}</h3>
+                                                <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded-full">
+                                                    Product
+                                                </span>
+                                            </div>
+                                            
+                                            <p class="text-gray-600 mb-4 text-sm">{{ product.description|default('No description')|slice(0, 80) }}...</p>
+                                            
+                                            <div class="space-y-2">
+                                                <div class="flex items-center text-sm">
+                                                    <svg class="w-4 h-4 text-gray-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
+                                                    </svg>
+                                                    <span class="text-gray-700">Price: <span class="font-bold text-[#C49A41]">₱{{ product.price|number_format(2) }}</span></span>
+                                                </div>
+                                                <div class="flex items-center text-sm">
+                                                    <svg class="w-4 h-4 text-gray-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z" clip-rule="evenodd"/>
+                                                    </svg>
+                                                    <span class="text-gray-700">Stock: <span class="font-bold {{ product.quantity > 10 ? 'text-green-600' : product.quantity > 5 ? 'text-yellow-600' : 'text-red-600' }}">{{ product.quantity }}</span></span>
+                                                </div>
+                                            </div>
+                                            
+                                            <button type="button" class="select-product-btn w-full mt-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-semibold text-sm">
+                                                Select This Product
+                                            </button>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-8">
+                                <p class="text-gray-500">No products available</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </section>
+
+                <!-- Inventory Warning -->
+                <div id="inventory-warning" class="hidden mb-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div class="flex items-start">
+                        <svg class="w-5 h-5 text-yellow-600 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                        </svg>
+                        <div>
+                            <p class="text-sm text-yellow-800 font-medium">Inventory Notice:</p>
+                            <p class="text-sm text-yellow-700 mt-1" id="inventory-message">
+                                When you change from a product to another item, the original product quantity will be restored.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Services Selection Section -->
+                <section class="bg-white py-8 rounded-2xl shadow-lg mb-8">
+                    <div class="max-w-7xl mx-auto px-6">
+                        <h2 class="text-2xl font-cinzel font-bold text-gray-900 mb-6 text-center">AVAILABLE SERVICES</h2>
+                        
+                        <!-- Selected Service Display -->
+                        <div id="selected-service-display" class="hidden mb-8 p-6 bg-white rounded-xl border-2 border-[#C49A41] shadow-lg">
+                            <div class="flex justify-between items-start">
+                                <div class="w-full">
+                                    <h3 class="text-xl font-cinzel font-bold text-gray-900 mb-4">Selected Service</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div class="space-y-3">
+                                            <div class="flex items-center">
+                                                <svg class="w-5 h-5 text-[#C49A41] mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
+                                                </svg>
+                                                <div>
+                                                    <span class="text-sm font-medium text-gray-600">Name:</span>
+                                                    <span id="selected-service-name" class="ml-2 text-gray-900 font-semibold">-</span>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <svg class="w-5 h-5 text-[#C49A41] mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                </svg>
+                                                <div>
+                                                    <span class="text-sm font-medium text-gray-600">Type:</span>
+                                                    <span class="ml-2 text-gray-900 font-semibold">Service</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="space-y-3">
+                                            <div class="flex items-center">
+                                                <svg class="w-5 h-5 text-[#C49A41] mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
+                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
+                                                </svg>
+                                                <div>
+                                                    <span class="text-sm font-medium text-gray-600">Price:</span>
+                                                    <span id="selected-service-price" class="ml-2 font-bold text-lg text-[#C49A41]">₱0.00</span>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center">
+                                                <svg class="w-5 h-5 text-[#C49A41] mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+                                                </svg>
+                                                <div>
+                                                    <span class="text-sm font-medium text-gray-600">Category:</span>
+                                                    <span id="selected-service-category" class="ml-2 text-gray-900 font-semibold">-</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" id="clear-service-selection" 
+                                        class="ml-6 text-red-600 hover:text-red-800 font-semibold flex items-center">
+                                    <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+                        
+                        {% if services|length > 0 %}
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {% for service in services %}
+                                    <div class="service-card bg-white rounded-xl shadow-md border border-gray-200 hover:shadow-xl transition-all duration-300 cursor-pointer group"
+                                         data-item-id="{{ service.id }}"
+                                         data-name="{{ service.name }}"
+                                         data-price="{{ service.price }}"
+                                         data-category="{{ service.category ? service.category.categoryname : 'N/A' }}"
+                                         data-description="{{ service.description|default('No description')|slice(0, 100) }}">
+                                        <div class="p-5">
+                                            <div class="flex justify-between items-start mb-3">
+                                                <h3 class="text-lg font-cinzel font-bold text-gray-900 group-hover:text-[#C49A41] transition-colors">{{ service.name }}</h3>
+                                                <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-2 py-1 rounded-full">
+                                                    Service
+                                                </span>
+                                            </div>
+                                            
+                                            <p class="text-gray-600 mb-4 text-sm">{{ service.description|default('No description')|slice(0, 80) }}...</p>
+                                            
+                                            <div class="space-y-2">
+                                                <div class="flex items-center text-sm">
+                                                    <svg class="w-4 h-4 text-gray-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"/>
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
+                                                    </svg>
+                                                    <span class="text-gray-700">Price: <span class="font-bold text-[#C49A41]">₱{{ service.price|number_format(2) }}</span></span>
+                                                </div>
+                                                <div class="flex items-center text-sm">
+                                                    <svg class="w-4 h-4 text-gray-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+                                                    </svg>
+                                                    <span class="text-gray-700">Category: {{ service.category ? service.category.categoryname : 'N/A' }}</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <button type="button" class="select-service-btn w-full mt-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all duration-300 font-semibold text-sm">
+                                                Select This Service
+                                            </button>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-8">
+                                <p class="text-gray-500">No services available</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </section>
+
+                <!-- Action Buttons -->
+                <div class="mt-8 flex justify-center space-x-6">
+                    <a href="{{ path('app_orders_index') }}" data-turbo="false"
+                       class="px-6 py-3 bg-gray-500 text-white rounded-lg shadow hover:bg-gray-600 transition font-semibold flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                        </svg>
+                        Back to Orders
+                    </a>
+
+                    {% if is_granted('ROLE_ADMIN') %}
+                        {{ include('orders/_delete_form.html.twig') }}
+                    {% endif %}
+                </div>
+
+                <!-- Information Box -->
+                <div class="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div class="flex items-start">
+                        <svg class="w-5 h-5 text-blue-600 mr-3 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                        <div>
+                            <p class="text-sm text-blue-800 font-medium">How to edit this order:</p>
+                            <ul class="text-sm text-blue-700 mt-1 list-disc list-inside">
+                                <li>Click on any product or service card to select it</li>
+                                <li>Only one item can be selected at a time (product OR service)</li>
+                                <li>The selected item will appear in a display card</li>
+                                <li>Click "Update Order" to save your changes</li>
+                                <li>Quantity is fixed at 1 per order</li>
+                                <li>The customer for this order cannot be changed</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('order-edit-form');
+    const selectedItemField = form.querySelector('#{{ form.selectedItem.vars.id }}');
+    const itemTypeField = form.querySelector('#{{ form.itemType.vars.id }}');
+    const priceField = form.querySelector('#{{ form.price.vars.id }}');
+    const productSelect = form.querySelector('#{{ form.productId.vars.id }}');
+    const serviceSelect = form.querySelector('#{{ form.serviceId.vars.id }}');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    // Product display elements
+    const selectedProductDisplay = document.getElementById('selected-product-display');
+    const selectedProductName = document.getElementById('selected-product-name');
+    const selectedProductPrice = document.getElementById('selected-product-price');
+    const selectedProductCategory = document.getElementById('selected-product-category');
+    const selectedProductStock = document.getElementById('selected-product-stock');
+    const clearProductBtn = document.getElementById('clear-product-selection');
+    
+    // Service display elements
+    const selectedServiceDisplay = document.getElementById('selected-service-display');
+    const selectedServiceName = document.getElementById('selected-service-name');
+    const selectedServicePrice = document.getElementById('selected-service-price');
+    const selectedServiceCategory = document.getElementById('selected-service-category');
+    const clearServiceBtn = document.getElementById('clear-service-selection');
+    
+    // Inventory warning elements
+    const inventoryWarning = document.getElementById('inventory-warning');
+    const inventoryMessage = document.getElementById('inventory-message');
+    
+    // Store original order information
+    const originalOrder = {
+        productId: {{ order.productId ? order.productId.id : 'null' }},
+        serviceId: {{ order.serviceId ? order.serviceId.id : 'null' }},
+        itemType: '{{ order.productId ? "product" : (order.serviceId ? "service" : "none") }}'
+    };
+    
+    let selectedProductCard = null;
+    let selectedServiceCard = null;
+    
+    // Handle product selection
+    document.querySelectorAll('.product-card').forEach(card => {
+        const selectBtn = card.querySelector('.select-product-btn');
+        
+        selectBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            selectProduct(card);
+        });
+        
+        card.addEventListener('click', function(e) {
+            if (!e.target.classList.contains('select-product-btn')) {
+                selectProduct(card);
+            }
+        });
+    });
+    
+    // Handle service selection
+    document.querySelectorAll('.service-card').forEach(card => {
+        const selectBtn = card.querySelector('.select-service-btn');
+        
+        selectBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            selectService(card);
+        });
+        
+        card.addEventListener('click', function(e) {
+            if (!e.target.classList.contains('select-service-btn')) {
+                selectService(card);
+            }
+        });
+    });
+    
+    function selectProduct(card) {
+        // Get original item info for warning
+        let originalName = '';
+        let originalType = '';
+        
+        if (originalOrder.itemType === 'product' && originalOrder.productId) {
+            // Find original product name
+            const originalProductCard = document.querySelector(`.product-card[data-item-id="${originalOrder.productId}"]`);
+            if (originalProductCard) {
+                originalName = originalProductCard.dataset.name;
+                originalType = 'product';
+            }
+        } else if (originalOrder.itemType === 'service' && originalOrder.serviceId) {
+            // Find original service name
+            const originalServiceCard = document.querySelector(`.service-card[data-item-id="${originalOrder.serviceId}"]`);
+            if (originalServiceCard) {
+                originalName = originalServiceCard.dataset.name;
+                originalType = 'service';
+            }
+        }
+        
+        // Show inventory warning if changing from different item
+        if ((originalType === 'product' && parseInt(card.dataset.itemId) !== originalOrder.productId) ||
+            (originalType === 'service')) {
+            showInventoryWarning(originalType, originalName, 'product', card.dataset.name);
+        } else {
+            hideInventoryWarning();
+        }
+        
+        // Clear any service selection first
+        clearServiceSelection();
+        
+        // Remove previous product selection
+        if (selectedProductCard) {
+            selectedProductCard.classList.remove('border-[#C49A41]', 'ring-2', 'ring-[#C49A41]/20');
+            selectedProductCard.querySelector('.select-product-btn').classList.remove('from-blue-800', 'to-blue-900');
+            selectedProductCard.querySelector('.select-product-btn').classList.add('from-blue-600', 'to-blue-700');
+        }
+        
+        // Set new product selection
+        card.classList.add('border-[#C49A41]', 'ring-2', 'ring-[#C49A41]/20');
+        card.querySelector('.select-product-btn').classList.remove('from-blue-600', 'to-blue-700');
+        card.querySelector('.select-product-btn').classList.add('from-blue-800', 'to-blue-900');
+        
+        selectedProductCard = card;
+        
+        // Update form fields
+        selectedItemField.value = card.dataset.itemId;
+        itemTypeField.value = 'product';
+        priceField.value = card.dataset.price;
+        
+        // Update hidden dropdown
+        if (productSelect) productSelect.value = card.dataset.itemId;
+        if (serviceSelect) serviceSelect.value = '';
+        
+        // Update display
+        selectedProductName.textContent = card.dataset.name;
+        selectedProductPrice.textContent = '₱' + parseFloat(card.dataset.price).toFixed(2);
+        selectedProductCategory.textContent = card.dataset.category;
+        selectedProductStock.textContent = card.dataset.quantity;
+        
+        // Show quantity warning for low quantity products
+        const quantity = parseInt(card.dataset.quantity);
+        if (quantity < 5) {
+            selectedProductStock.classList.add('text-red-600', 'font-bold');
+        } else {
+            selectedProductStock.classList.remove('text-red-600', 'font-bold');
+        }
+        
+        // Show selected product display
+        selectedProductDisplay.classList.remove('hidden');
+        selectedServiceDisplay.classList.add('hidden');
+        
+        // Enable submit button
+        submitBtn.disabled = false;
+    }
+    
+    function selectService(card) {
+        // Get original item info for warning
+        let originalName = '';
+        let originalType = '';
+        
+        if (originalOrder.itemType === 'product' && originalOrder.productId) {
+            // Find original product name
+            const originalProductCard = document.querySelector(`.product-card[data-item-id="${originalOrder.productId}"]`);
+            if (originalProductCard) {
+                originalName = originalProductCard.dataset.name;
+                originalType = 'product';
+            }
+        } else if (originalOrder.itemType === 'service' && originalOrder.serviceId) {
+            // Find original service name
+            const originalServiceCard = document.querySelector(`.service-card[data-item-id="${originalOrder.serviceId}"]`);
+            if (originalServiceCard) {
+                originalName = originalServiceCard.dataset.name;
+                originalType = 'service';
+            }
+        }
+        
+        // Show inventory warning if changing from product to service
+        if (originalType === 'product') {
+            showInventoryWarning('product', originalName, 'service', card.dataset.name);
+        } else if (originalType === 'service' && parseInt(card.dataset.itemId) !== originalOrder.serviceId) {
+            // Changing from one service to another
+            showInventoryWarning('service', originalName, 'service', card.dataset.name);
+        } else {
+            hideInventoryWarning();
+        }
+        
+        // Clear any product selection first
+        clearProductSelection();
+        
+        // Remove previous service selection
+        if (selectedServiceCard) {
+            selectedServiceCard.classList.remove('border-[#C49A41]', 'ring-2', 'ring-[#C49A41]/20');
+            selectedServiceCard.querySelector('.select-service-btn').classList.remove('from-purple-800', 'to-purple-900');
+            selectedServiceCard.querySelector('.select-service-btn').classList.add('from-purple-600', 'to-purple-700');
+        }
+        
+        // Set new service selection
+        card.classList.add('border-[#C49A41]', 'ring-2', 'ring-[#C49A41]/20');
+        card.querySelector('.select-service-btn').classList.remove('from-purple-600', 'to-purple-700');
+        card.querySelector('.select-service-btn').classList.add('from-purple-800', 'to-purple-900');
+        
+        selectedServiceCard = card;
+        
+        // Update form fields
+        selectedItemField.value = card.dataset.itemId;
+        itemTypeField.value = 'service';
+        priceField.value = card.dataset.price;
+        
+        // Update hidden dropdown
+        if (serviceSelect) serviceSelect.value = card.dataset.itemId;
+        if (productSelect) productSelect.value = '';
+        
+        // Update display
+        selectedServiceName.textContent = card.dataset.name;
+        selectedServicePrice.textContent = '₱' + parseFloat(card.dataset.price).toFixed(2);
+        selectedServiceCategory.textContent = card.dataset.category;
+        
+        // Show selected service display
+        selectedServiceDisplay.classList.remove('hidden');
+        selectedProductDisplay.classList.add('hidden');
+        
+        // Enable submit button
+        submitBtn.disabled = false;
+    }
+    
+    function clearProductSelection() {
+        if (selectedProductCard) {
+            selectedProductCard.classList.remove('border-[#C49A41]', 'ring-2', 'ring-[#C49A41]/20');
+            selectedProductCard.querySelector('.select-product-btn').classList.remove('from-blue-800', 'to-blue-900');
+            selectedProductCard.querySelector('.select-product-btn').classList.add('from-blue-600', 'to-blue-700');
+            selectedProductCard = null;
+        }
+        
+        selectedProductDisplay.classList.add('hidden');
+        hideInventoryWarning();
+    }
+    
+    function clearServiceSelection() {
+        if (selectedServiceCard) {
+            selectedServiceCard.classList.remove('border-[#C49A41]', 'ring-2', 'ring-[#C49A41]/20');
+            selectedServiceCard.querySelector('.select-service-btn').classList.remove('from-purple-800', 'to-purple-900');
+            selectedServiceCard.querySelector('.select-service-btn').classList.add('from-purple-600', 'to-purple-700');
+            selectedServiceCard = null;
+        }
+        
+        selectedServiceDisplay.classList.add('hidden');
+        hideInventoryWarning();
+    }
+    
+    function showInventoryWarning(fromType, fromName, toType, toName) {
+        if (fromType === 'product' && toType === 'product') {
+            // Changing from one product to another
+            inventoryMessage.textContent = `Changing from "${fromName}" to "${toName}". The quantity of "${fromName}" will be restored (+1), and "${toName}" quantity will be reduced by 1 (-1).`;
+            inventoryWarning.classList.remove('hidden');
+        } else if (fromType === 'product' && toType === 'service') {
+            // Changing from product to service
+            inventoryMessage.textContent = `Changing from product "${fromName}" to service "${toName}". The quantity of "${fromName}" will be restored (+1).`;
+            inventoryWarning.classList.remove('hidden');
+        } else if (fromType === 'service' && toType === 'product') {
+            // Changing from service to product
+            inventoryMessage.textContent = `Changing from service "${fromName}" to product "${toName}". The product quantity will be reduced by 1 (-1).`;
+            inventoryWarning.classList.remove('hidden');
+        } else if (fromType === 'service' && toType === 'service') {
+            // Changing from one service to another
+            inventoryMessage.textContent = `Changing from service "${fromName}" to service "${toName}". No inventory changes.`;
+            inventoryWarning.classList.remove('hidden');
+        } else if (fromType === '' && toType === 'product') {
+            // No original item (shouldn't happen in edit, but just in case)
+            inventoryMessage.textContent = `Selecting product "${toName}". Product quantity will be reduced by 1 (-1).`;
+            inventoryWarning.classList.remove('hidden');
+        } else {
+            inventoryWarning.classList.add('hidden');
+        }
+    }
+    
+    function hideInventoryWarning() {
+        inventoryWarning.classList.add('hidden');
+    }
+    
+    function clearFormFields() {
+        selectedItemField.value = '';
+        itemTypeField.value = '';
+        priceField.value = '';
+        
+        if (productSelect) productSelect.value = '';
+        if (serviceSelect) serviceSelect.value = '';
+        
+        submitBtn.disabled = true;
+    }
+    
+    // Handle clear buttons
+    clearProductBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        clearProductSelection();
+        clearFormFields();
+    });
+    
+    clearServiceBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        clearServiceSelection();
+        clearFormFields();
+    });
+    
+    // Form submission validation
+    form.addEventListener('submit', function(e) {
+        // Validate item selection
+        if (!selectedItemField.value || !itemTypeField.value) {
+            e.preventDefault();
+            alert('Please select an item before submitting.');
+            return;
+        }
+        
+        // Additional validation for product quantity
+        if (itemTypeField.value === 'product' && selectedProductCard) {
+            const quantity = parseInt(selectedProductCard.dataset.quantity);
+            if (quantity <= 0) {
+                e.preventDefault();
+                alert('This product is out of stock. Please select a different item.');
+                return;
+            }
+        }
+        
+        // Get additional info for confirmation message
+        let inventoryChangeMessage = '';
+        const selectedProductId = selectedItemField.value && itemTypeField.value === 'product' ? selectedItemField.value : null;
+        const selectedServiceId = selectedItemField.value && itemTypeField.value === 'service' ? selectedItemField.value : null;
+        
+        // Determine if inventory will change
+        if (originalOrder.itemType === 'product' && selectedServiceId) {
+            // Changing from product to service - inventory will be restored
+            const originalProductCard = document.querySelector(`.product-card[data-item-id="${originalOrder.productId}"]`);
+            if (originalProductCard) {
+                inventoryChangeMessage = `\n• Quantity of "${originalProductCard.dataset.name}" will be restored (+1)`;
+            }
+        } else if (originalOrder.itemType === 'product' && selectedProductId && parseInt(selectedProductId) !== originalOrder.productId) {
+            // Changing from one product to another
+            const originalProductCard = document.querySelector(`.product-card[data-item-id="${originalOrder.productId}"]`);
+            const newProductCard = document.querySelector(`.product-card[data-item-id="${selectedProductId}"]`);
+            if (originalProductCard && newProductCard) {
+                inventoryChangeMessage = `\n• Quantity of "${originalProductCard.dataset.name}" will be restored (+1)`;
+                inventoryChangeMessage += `\n• Quantity of "${newProductCard.dataset.name}" will be reduced by 1 (-1)`;
+            }
+        } else if (originalOrder.itemType === 'service' && selectedProductId) {
+            // Changing from service to product
+            const newProductCard = document.querySelector(`.product-card[data-item-id="${selectedProductId}"]`);
+            if (newProductCard) {
+                inventoryChangeMessage = `\n• Quantity of "${newProductCard.dataset.name}" will be reduced by 1 (-1)`;
+            }
+        } else if (originalOrder.itemType === 'product' && selectedProductId && parseInt(selectedProductId) === originalOrder.productId) {
+            // Same product selected - no inventory change
+            inventoryChangeMessage = `\n• No inventory changes (same product selected)`;
+        } else if (originalOrder.itemType === 'service' && selectedServiceId && parseInt(selectedServiceId) === originalOrder.serviceId) {
+            // Same service selected - no inventory change
+            inventoryChangeMessage = `\n• No inventory changes (same service selected)`;
+        } else if (originalOrder.itemType === 'service' && selectedServiceId && parseInt(selectedServiceId) !== originalOrder.serviceId) {
+            // Changing from one service to another
+            const originalServiceCard = document.querySelector(`.service-card[data-item-id="${originalOrder.serviceId}"]`);
+            const newServiceCard = document.querySelector(`.service-card[data-item-id="${selectedServiceId}"]`);
+            if (originalServiceCard && newServiceCard) {
+                inventoryChangeMessage = `\n• No inventory changes (services don't affect inventory)`;
+            }
+        }
+        
+        const newPrice = parseFloat(priceField.value) || 0;
+        let confirmMessage = `Are you sure you want to update this order?\n\nNew item price: ₱${newPrice.toFixed(2)}`;
+        
+        if (inventoryChangeMessage) {
+            confirmMessage += `\n\nInventory changes:${inventoryChangeMessage}`;
+        }
+        
+        // Get item name for confirmation
+        let itemName = '';
+        if (selectedProductCard) {
+            itemName = selectedProductCard.dataset.name;
+        } else if (selectedServiceCard) {
+            itemName = selectedServiceCard.dataset.name;
+        }
+        
+        if (itemName) {
+            confirmMessage += `\n\nNew item: ${itemName}`;
+        }
+        
+        if (!confirm(confirmMessage)) {
+            e.preventDefault();
+        }
+    });
+    
+    // Initialize submit button state
+    submitBtn.disabled = true;
+    
+    // If editing and there's already a selected item, show appropriate display
+    // (This handles page refresh or returning to edit page)
+    if (originalOrder.itemType === 'product' && originalOrder.productId) {
+        const originalProductCard = document.querySelector(`.product-card[data-item-id="${originalOrder.productId}"]`);
+        if (originalProductCard) {
+            // Simulate selecting the original product
+            setTimeout(() => {
+                selectProduct(originalProductCard);
+            }, 100);
+        }
+    } else if (originalOrder.itemType === 'service' && originalOrder.serviceId) {
+        const originalServiceCard = document.querySelector(`.service-card[data-item-id="${originalOrder.serviceId}"]`);
+        if (originalServiceCard) {
+            // Simulate selecting the original service
+            setTimeout(() => {
+                selectService(originalServiceCard);
+            }, 100);
+        }
+    }
+});
+</script>
+{% endblock %}

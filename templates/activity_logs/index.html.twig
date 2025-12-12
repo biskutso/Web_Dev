@@ -9,7 +9,105 @@
 
         {% include 'admin/header.html.twig' %}
 
+        <!-- FILTER SECTION -->
         <div class="flex justify-center p-8">
+            <div class="w-full max-w-5xl">
+
+                {# --- ACTION GROUPS (used in dropdown + filtering) --- #}
+                {% set actionGroups = {
+                    'Login': [
+                        'User Login'
+                    ],
+                    'Logout': [
+                        'User Logout'
+                    ],
+                    'Create': [
+                        'Created User',
+                        'Created Product',
+                        'Created Category',
+                        'Created Service',
+                        'Created Order'
+                    ],
+                    'Update': [
+                        'Edited User',
+                        'Edited Product',
+                        'Edited Category',
+                        'Edited Service',
+                        'Edited Order'
+                    ],
+                    'Delete': [
+                        'Deleted User',
+                        'Deleted Product',
+                        'Deleted Category',
+                        'Deleted Service',
+                        'Deleted Order'
+                    ]
+                } %}
+
+                <form method="get" class="mb-6 w-full bg-white p-6 rounded-xl shadow-lg">
+
+                    <h2 class="text-lg font-semibold mb-4 text-gray-700">Filter Logs</h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+
+                        <!-- User Filter -->
+                        <div>
+                            <label class="text-sm font-semibold">User</label>
+                            <select name="user" class="w-full border rounded px-2 py-1 text-sm">
+                                <option value="">All Users</option>
+                                {% for u in allUsers %}
+                                    <option value="{{ u }}" {{ app.request.get('user') == u ? 'selected' : '' }}>
+                                        {{ u }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Action Filter -->
+                        <div>
+                            <label class="text-sm font-semibold">Action</label>
+                            <select name="action" class="w-full border rounded px-2 py-1 text-sm">
+                                <option value="">All Actions</option>
+
+                                {% for groupName, groupActions in actionGroups %}
+                                    <option value="{{ groupName }}" 
+                                        {{ app.request.get('action') == groupName ? 'selected' : '' }}>
+                                        {{ groupName }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Date From -->
+                        <div>
+                            <label class="text-sm font-semibold">Date From</label>
+                            <input type="date" name="date_from" value="{{ app.request.get('date_from') }}"
+                                   class="w-full border rounded px-2 py-1 text-sm">
+                        </div>
+
+                        <!-- Date To -->
+                        <div>
+                            <label class="text-sm font-semibold">Date To</label>
+                            <input type="date" name="date_to" value="{{ app.request.get('date_to') }}"
+                                   class="w-full border rounded px-2 py-1 text-sm">
+                        </div>
+
+                    </div>
+
+                    <div class="flex gap-3 mt-4">
+                        <button type="submit"
+                                class="bg-blue-600 text-white px-4 py-2 rounded">Filter</button>
+
+                        <a href="{{ path('app_activity_logs') }}"
+                           class="bg-gray-400 text-white px-4 py-2 rounded">Reset</a>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <!-- LOGS TABLE -->
+        <div class="flex justify-center p-4">
             <div class="w-full max-w-5xl bg-white p-8 rounded-xl shadow-lg">
                 <h1 class="text-2xl font-bold mb-4 text-gray-800 text-center">Activity Logs</h1>
 
@@ -17,33 +115,46 @@
                     <table id="productsTable" class="w-full border-collapse border border-gray-300 bg-white rounded-lg overflow-hidden shadow">
                         <thead class="bg-gray-100 text-gray-700">
                             <tr>
-                                <th class="border border-gray-300 px-4 py-2 text-sm font-semibold w-12 text-center">User</th>
-                                <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-left w-40">Role</th>
-                                <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-left w-40">Action</th>
-                                <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-left w-40">Target Data</th>
-                                <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-center w-40">Date & Time</th>
+                                <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-center">User</th>
+                                <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-left">Role</th>
+                                <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-left">Action</th>
+                                <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-left">Target Data</th>
+                                <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-center">Date & Time</th>
                             </tr>
                         </thead>
-                        <tbody id="productsTableBody" class="divide-y divide-gray-200">
+
+                        <tbody class="divide-y divide-gray-200">
+
+                            {% set selectedGroup = app.request.get('action') %}
+                            {% set validActions = selectedGroup ? (actionGroups[selectedGroup] ?? []) : [] %}
+
                             {% for log in logs %}
-                                <tr class="odd:bg-white even:bg-gray-50 hover:bg-gray-100">
-                                    <td class="border border-gray-300 px-4 py-2 text-center">{{ log.userid ? log.userid.username : log.username }}</td>
-                                    <td class="border border-gray-300 px-4 py-2 font-medium text-gray-900">{{ log.role }}</td>
-                                    <td class="border border-gray-300 px-4 py-2 font-medium text-gray-900">{{ log.action }}</td>
-                                    <td class="border border-gray-300 px-4 py-2 font-medium text-gray-900">{{ log.targetData }}</td>
-                                    <td class="border border-gray-300 px-4 py-2 font-medium text-gray-900">{{ log.datetime|date('Y-m-d h:i A', 'Asia/Manila') }}</td>
-                                </tr>
+                                {% if selectedGroup == '' or selectedGroup is empty or log.action in validActions %}
+                                    <tr class="odd:bg-white even:bg-gray-50 hover:bg-gray-100">
+                                        <td class="border border-gray-300 px-4 py-2 text-center">
+                                            {{ log.userid ? log.userid.username : log.username }}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2">{{ log.role }}</td>
+                                        <td class="border border-gray-300 px-4 py-2">{{ log.action }}</td>
+                                        <td class="border border-gray-300 px-4 py-2">{{ log.targetData }}</td>
+                                        <td class="border border-gray-300 px-4 py-2">
+                                            {{ log.datetime|date('Y-m-d h:i A', 'Asia/Manila') }}
+                                        </td>
+                                    </tr>
+                                {% endif %}
                             {% else %}
                                 <tr>
-                                    <td colspan="6" class="px-4 py-2 text-center text-gray-500 bg-gray-50">
+                                    <td colspan="5" class="px-4 py-2 text-center text-gray-500 bg-gray-50">
                                         No Activity Logs Found
                                     </td>
                                 </tr>
                             {% endfor %}
                         </tbody>
+
                     </table>
                 </div>
             </div>
         </div>
+
     </div>
 {% endblock %}

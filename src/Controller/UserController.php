@@ -40,7 +40,6 @@ final class UserController extends AbstractController
             $plainPassword = $form->get('password')->getData();
             
             if ($plainPassword) {
-                // Hash the password
                 $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
                 $user->setPassword($hashedPassword);
             }
@@ -48,9 +47,10 @@ final class UserController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
+            // Use standardized action names
             $activitylogger->log(
                 'Created User',
-                'User: ' . $user->getusername() . ' Role: ' . str_replace('ROLE_', '', $user->getPrimaryRole()) . ' (ID:' . $user->getId() . ')'
+                'User: ' . $user->getUsername() . ' Role: ' . str_replace('ROLE_', '', $user->getPrimaryRole()) . ' (ID:' . $user->getId() . ')'
             );
 
             $this->addFlash('success', 'User created successfully.');
@@ -84,17 +84,16 @@ final class UserController extends AbstractController
             $plainPassword = $form->get('password')->getData();
             
             if (!empty($plainPassword)) {
-                // Hash the new password
                 $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
                 $user->setPassword($hashedPassword);
             }
-            // If password is empty, we do nothing - keep the current password
             
             $entityManager->flush();
 
+            // Use standardized action names
             $activitylogger->log(
                 'Edited User',
-                'User: ' . $user->getusername() . ' Role: ' . str_replace('ROLE_', '', $user->getPrimaryRole()) . ' (ID:' . $user->getId() . ')'
+                'User: ' . $user->getUsername() . ' Role: ' . str_replace('ROLE_', '', $user->getPrimaryRole()) . ' (ID:' . $user->getId() . ')'
             );
 
             $this->addFlash('success', 'User updated successfully.');
@@ -111,16 +110,17 @@ final class UserController extends AbstractController
     public function delete(Request $request, User $user, EntityManagerInterface $entityManager, ActivityLogger $activitylogger): Response
     {
         if ($this->isCsrfTokenValid('delete'.$user->getId(), $request->getPayload()->getString('_token'))) {
-            $usertId = $user->getId();
-            $userName = $user->getusername();
+            $userId = $user->getId();
+            $userName = $user->getUsername();
             $userRole = str_replace('ROLE_', '', $user->getPrimaryRole());
            
             $entityManager->remove($user);
             $entityManager->flush();
             
+            // Use standardized action names
             $activitylogger->log(
                 'Deleted User',
-                'User: ' . $userName . ' Role: ' . $userRole . ' (ID:' . $usertId . ')'
+                'User: ' . $userName . ' Role: ' . $userRole . ' (ID:' . $userId . ')'
             );
 
             $this->addFlash('success', 'User deleted successfully.');

@@ -21,3 +21,31 @@
 .toggle-password:focus {
     outline: none;
 }
+
+.hero-section2 {
+        background-image: url('https://images.unsplash.com/photo-1558981285-6f0c94958bb6?ixlib=rb-1.2.1&auto=format&fit=crop&w=1600&q=80');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+    
+    .item-card1 {
+        transition: all 0.3s ease;
+    }
+    
+    .item-card1:hover {
+        transform: translateY(-8px);
+    }
+    
+    .item-card1.selected {
+        box-shadow: 0 10px 25px -5px rgba(196, 154, 65, 0.3);
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .animate-fade-in {
+        animation: fadeIn 0.3s ease-out;
+    }

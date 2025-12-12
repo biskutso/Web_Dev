@@ -47,6 +47,7 @@ final class CategoriesController extends AbstractController
             $entityManager->persist($category);
             $entityManager->flush();
 
+            // Use standardized action names (will be converted by ActivityLogger)
             $activitylogger->log(
                 'Created Category',
                 'Category: ' . $category->getCategoryName() . ' (ID:' . $category->getId() . ')'
@@ -60,7 +61,7 @@ final class CategoriesController extends AbstractController
 
         return $this->render('categories/new.html.twig', [
             'category' => $category,
-            'form' => $form->createView(), // Use createView() here
+            'form' => $form->createView(),
         ]);
     }
 
@@ -87,7 +88,8 @@ final class CategoriesController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
-             $activitylogger->log(
+            // Use standardized action names (will be converted by ActivityLogger)
+            $activitylogger->log(
                 'Edited Category',
                 'Category: ' . $category->getCategoryName() . ' (ID:' . $category->getId() . ')'
             );
@@ -99,7 +101,7 @@ final class CategoriesController extends AbstractController
 
         return $this->render('categories/edit.html.twig', [
             'category' => $category,
-            'form' => $form->createView(), // Use createView() here
+            'form' => $form->createView(),
         ]);
     }
 
@@ -116,6 +118,7 @@ final class CategoriesController extends AbstractController
             $entityManager->remove($category);
             $entityManager->flush();
             
+            // Use standardized action names (will be converted by ActivityLogger)
             $activitylogger->log(
                 'Deleted Category',
                 'Category: ' . $categoryName . ' (ID:' . $categoryId . ')'
@@ -129,10 +132,6 @@ final class CategoriesController extends AbstractController
 
     /**
      * Check if the current user has access to the category
-     *
-     * @param Categories $category The category to check access for
-     * @param string $action The action being performed (view, edit, delete)
-     * @throws AccessDeniedException
      */
     private function checkCategoryAccess(Categories $category, string $action = 'view'): void
     {
@@ -157,12 +156,11 @@ final class CategoriesController extends AbstractController
                 throw new AccessDeniedException('You can only ' . $action . ' categories that you created.');
             }
             
-            // Compare the user objects directly (recommended approach)
+            // Compare the user objects directly
             if ($currentUser === $categoryOwner) {
-                return; // Staff can access their own categories
+                return;
             }
             
-            // Staff trying to access someone else's category
             throw new AccessDeniedException('You can only ' . $action . ' categories that you created.');
         }
 

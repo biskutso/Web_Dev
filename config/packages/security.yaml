@@ -34,6 +34,7 @@ security:
         - { path: ^/poducts, roles: [ROLE_ADMIN, ROLE_STAFF] }
         - { path: ^/categories, roles: [ROLE_ADMIN, ROLE_STAFF] }
         - { path: ^/services, roles: [ROLE_ADMIN, ROLE_STAFF] }
+        - { path: ^/orders, roles: [ROLE_ADMIN, ROLE_STAFF, ROLE_USER] }
         - { path: ^/user, roles: [ROLE_ADMIN] }
         - { path: ^/activity_logs, roles: [ROLE_ADMIN] }
 

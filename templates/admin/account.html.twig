@@ -144,6 +144,8 @@
                                         <span class="text-[#C49A41] font-medium">Administrator</span>
                                     {% elseif 'ROLE_STAFF' in app.user.roles %}
                                         <span class="text-blue-600 font-medium">Staff</span>
+                                    {% elseif 'ROLE_USER' in app.user.roles %}
+                                        <span class="text-blue-600 font-medium">User</span>
                                     {% endif %}
                                 </p>
                             </div>

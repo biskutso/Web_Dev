@@ -1,0 +1,130 @@
+{{ form_start(form, {'attr': {'class': 'space-y-6', 'id': 'order-edit-form'}}) }}
+
+    <!-- Hidden fields -->
+    <div class="hidden">
+        {{ form_widget(form.selectedItem) }}
+        {{ form_widget(form.itemType) }}
+        {{ form_widget(form.price) }}
+        {{ form_widget(form.quantity) }}
+        {{ form_widget(form.categoryId) }}
+    </div>
+
+    <!-- Product Selection Dropdown -->
+    {% if form.productId is defined %}
+    <div>
+        <label class="block text-sm font-medium text-gray-900 mb-2">Select Product</label>
+        {{ form_widget(form.productId, {'attr': {'class': 'w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500', 'onchange': 'updateOrderInfo()'}}) }}
+        {{ form_errors(form.productId) }}
+    </div>
+    {% endif %}
+
+    <!-- Service Selection Dropdown -->
+    {% if form.serviceId is defined %}
+    <div>
+        <label class="block text-sm font-medium text-gray-900 mb-2">Select Service</label>
+        {{ form_widget(form.serviceId, {'attr': {'class': 'w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500', 'onchange': 'updateOrderInfo()'}}) }}
+        {{ form_errors(form.serviceId) }}
+    </div>
+    {% endif %}
+
+    <!-- Selected Item Display -->
+    <div id="item-info" class="bg-gray-50 p-4 rounded-lg border border-gray-300 mt-4 hidden">
+        <h3 class="text-lg font-semibold text-gray-900 mb-3">Selected Item Details</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+                <p class="text-sm text-gray-600">Name:</p>
+                <p id="item-name" class="font-semibold text-gray-900">-</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Type:</p>
+                <p id="item-type" class="font-semibold text-gray-900">-</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Price:</p>
+                <p id="item-price" class="font-bold text-lg text-[#C49A41]">₱0.00</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-600">Category:</p>
+                <p id="item-category" class="font-semibold text-gray-900">-</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Customer Info (Read-only) -->
+    <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+        <p class="text-sm text-blue-800 font-medium">Customer:</p>
+        <p class="text-lg font-semibold text-blue-900">{{ order.user.username }}</p>
+        <p class="text-sm text-blue-600 mt-1">This cannot be changed for existing orders.</p>
+    </div>
+
+    <!-- Quantity Info (Read-only) -->
+    <div class="bg-gray-50 p-4 rounded-lg border border-gray-300">
+        <p class="text-sm text-gray-800 font-medium">Quantity:</p>
+        <p class="text-lg font-semibold text-gray-900">1 (fixed)</p>
+        <p class="text-sm text-gray-600 mt-1">Quantity is always 1 per order and cannot be changed.</p>
+    </div>
+
+    <div class="pt-6">
+        <button data-turbo="false" type="submit" class="w-full px-6 py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 cursor-pointer font-semibold text-lg">
+            ✅ {{ button_label|default('Update Order') }}
+        </button>
+    </div>
+
+{{ form_end(form) }}
+
+<script>
+function updateOrderInfo() {
+    const productSelect = document.querySelector('#{{ form.productId.vars.id }}');
+    const serviceSelect = document.querySelector('#{{ form.serviceId.vars.id }}');
+    const itemInfo = document.getElementById('item-info');
+    const itemName = document.getElementById('item-name');
+    const itemType = document.getElementById('item-type');
+    const itemPrice = document.getElementById('item-price');
+    const itemCategory = document.getElementById('item-category');
+    
+    // Clear the other dropdown when one is selected
+    if (productSelect && productSelect.value) {
+        if (serviceSelect) serviceSelect.value = '';
+        showItemInfo('product', productSelect.value);
+    } else if (serviceSelect && serviceSelect.value) {
+        if (productSelect) productSelect.value = '';
+        showItemInfo('service', serviceSelect.value);
+    } else {
+        itemInfo.classList.add('hidden');
+    }
+}
+
+// This function would need AJAX to fetch item details
+// For now, we'll just show basic info
+function showItemInfo(type, id) {
+    const itemInfo = document.getElementById('item-info');
+    const itemName = document.getElementById('item-name');
+    const itemTypeElem = document.getElementById('item-type');
+    const itemPrice = document.getElementById('item-price');
+    
+    // Get selected option text
+    let selectElement;
+    if (type === 'product') {
+        selectElement = document.querySelector('#{{ form.productId.vars.id }}');
+        itemTypeElem.textContent = 'Product';
+    } else {
+        selectElement = document.querySelector('#{{ form.serviceId.vars.id }}');
+        itemTypeElem.textContent = 'Service';
+    }
+    
+    if (selectElement && selectElement.options[selectElement.selectedIndex]) {
+        itemName.textContent = selectElement.options[selectElement.selectedIndex].text;
+        itemInfo.classList.remove('hidden');
+        
+        // In a real implementation, you would fetch price/category via AJAX
+        // For now, we'll just show placeholders
+        itemPrice.textContent = '$--.--';
+        document.getElementById('item-category').textContent = 'Will be set automatically';
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateOrderInfo();
+});
+</script>

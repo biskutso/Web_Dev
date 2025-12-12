@@ -1,0 +1,155 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Orders Index{% endblock %}
+
+{% block body %}
+    {% include 'admin/sidebar.html.twig' %}
+
+    <div class="flex-1 flex flex-col overflow-hidden">
+        {% include 'admin/header.html.twig' %}
+
+        <div class="flex justify-center p-8">
+            <div class="w-full max-w-7xl bg-white p-8 rounded-xl shadow-lg">
+                <h1 class="text-2xl font-bold mb-4 text-gray-800 text-center">
+                    {% if is_granted('ROLE_ADMIN') %}
+                        All Orders
+                    {% elseif is_granted('ROLE_STAFF') %}
+                        My Created Orders
+                    {% elseif is_granted('ROLE_USER') %}
+                        My Orders
+                    {% else %}
+                        Orders
+                    {% endif %}
+                </h1>
+
+                <!-- Flash Messages -->
+                {% include 'admin/flashmessage.html.twig' %}
+
+                <div class="overflow-x-auto bg-gray-100 p-6 rounded-lg shadow-md">
+                    <table id="ordersTable" class="w-full border-collapse border border-gray-300 bg-white rounded-lg overflow-hidden shadow">
+                        <thead class="bg-gray-100 text-gray-700">
+                            <tr>
+                                <th class="border border-gray-300 px-4 py-2 text-sm font-semibold w-12 text-center">Id</th>
+                                <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-left w-40">User</th>
+                                <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-left w-40">Created By</th>
+                                <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-left w-40">Ordered Item</th>
+                                <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-left w-40">Category</th>
+                                <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-left w-40">Category Type</th>
+                                <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-left w-24">Price</th>
+                                <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-left w-20">Qty.</th>
+                                <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-left w-40">Order Created</th>
+                                <th class="border border-gray-300 px-4 py-2 text-sm font-semibold text-center w-32">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody" class="divide-y divide-gray-200">
+                            {% set hasOrders = false %}
+                            {% for order in orders %}
+                                {# Check if current user should see this order #}
+                                {% if is_granted('ROLE_ADMIN') %}
+                                    {# Admin sees all orders #}
+                                    {% set shouldShow = true %}
+                                {% elseif is_granted('ROLE_STAFF') %}
+                                    {# Staff sees orders where they are the createdBy #}
+                                    {% set shouldShow = order.createdBy and app.user and order.createdBy.id == app.user.id %}
+                                {% elseif is_granted('ROLE_USER') %}
+                                    {# Users see orders where they are either the user OR the createdBy #}
+                                    {% set shouldShow = (order.user and app.user and order.user.id == app.user.id) or 
+                                                        (order.createdBy and app.user and order.createdBy.id == app.user.id) %}
+                                {% else %}
+                                    {% set shouldShow = false %}
+                                {% endif %}
+                                
+                                {% if shouldShow %}
+                                    {% set hasOrders = true %}
+                                    <tr class="odd:bg-white even:bg-gray-50 hover:bg-gray-100">
+                                        <td class="border border-gray-300 px-4 py-2 text-center">{{ order.id }}</td>
+                                        <td class="border border-gray-300 px-4 py-2 font-medium text-gray-900">
+                                            {{ order.user ? order.user.username|capitalize : 'N/A' }}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2 font-medium text-gray-900">
+                                            {{ order.createdBy ? order.createdBy.username|capitalize : 'N/A' }}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2 font-medium text-gray-900">
+                                            {% if order.productId %}
+                                                Product: {{ order.productId.name }}
+                                            {% elseif order.serviceId %}
+                                                Service: {{ order.serviceId.name }}
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2 font-medium text-gray-900">
+                                            {{ order.categoryId ? order.categoryId.categoryname : 'N/A' }}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2 font-medium text-gray-900">
+                                            {{ order.categoryId ? order.categoryId.type.value|capitalize : 'N/A' }}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2 font-medium text-gray-900">
+                                            ₱{{ order.price|number_format(2) }}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2 font-medium text-gray-900">
+                                            {{ order.quantity }}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2 font-medium text-gray-900">
+                                            {{ order.orderCreated ? order.orderCreated|date('Y-m-d h:i A', 'Asia/Manila') : '' }}
+                                        </td>
+                                        <td class="border border-gray-300 px-4 py-2 text-center">
+                                            {# Admin can do actions on all orders #}
+                                            {% if is_granted('ROLE_ADMIN') %}
+                                                <a href="{{ path('app_orders_show', {'id': order.id}) }}" 
+                                                class="text-blue-600 hover:text-blue-800 font-semibold mx-1">Show</a>
+                                                <a href="{{ path('app_orders_edit', {'id': order.id}) }}" 
+                                                class="text-yellow-600 hover:text-yellow-800 font-semibold mx-1">Edit</a>
+                                            
+                                            {# Staff can only view/edit orders they created #}
+                                            {% elseif is_granted('ROLE_STAFF') %}
+                                                {# Check if staff created this order (already filtered above) #}
+                                                <a href="{{ path('app_orders_show', {'id': order.id}) }}" 
+                                                class="text-blue-600 hover:text-blue-800 font-semibold mx-1">Show</a>
+                                                <a href="{{ path('app_orders_edit', {'id': order.id}) }}" 
+                                                class="text-yellow-600 hover:text-yellow-800 font-semibold mx-1">Edit</a>
+                                            
+                                            {# Users can only see and show their own orders #}
+                                            {% elseif is_granted('ROLE_USER') %}
+                                                {# User can only show orders where they are the user #}
+                                                {% if order.user and app.user and order.user.id == app.user.id %}
+                                                    <a href="{{ path('app_orders_show', {'id': order.id}) }}" 
+                                                    class="text-blue-600 hover:text-blue-800 font-semibold mx-1">Show</a>
+                                                {% else %}
+                                                    {# User can see but not access orders where they are only the creator #}
+                                                    <span class="text-gray-500 text-sm font-medium">View only</span>
+                                                {% endif %}
+                                            
+                                            {# For any other roles, no actions available #}
+                                            {% else %}
+                                                <span class="text-gray-500 text-sm font-medium">No access</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if not hasOrders %}
+                                <tr>
+                                    <td colspan="10" class="px-4 py-2 text-center text-gray-500 bg-gray-50">
+                                        No orders found
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-6 text-center">
+                    {# Check permissions for creating new orders #}
+                    {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF') or is_granted('ROLE_USER') %}
+                        <a href="{{ path('app_orders_new') }}" 
+                        class="inline-block px-5 py-2 bg-green-600 text-white rounded-lg shadow hover:bg-green-700">
+                            + Create new order
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
