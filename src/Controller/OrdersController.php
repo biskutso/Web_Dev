@@ -11,6 +11,7 @@ use App\Repository\OrdersRepository;
 use App\Repository\ProductsRepository;
 use App\Repository\ServicesRepository;
 use App\Repository\UserRepository;
+use App\Service\ActivityLogger;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,9 +29,11 @@ class OrdersController extends AbstractController
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         
         // Get orders based on user role
-        if ($this->isGranted('ROLE_ADMIN')) {
+        if ($this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_STAFF')) {
+            // BOTH Admin and Staff can see all orders
             $orders = $ordersRepository->findAll();
         } elseif ($this->isGranted('ROLE_STAFF')) {
+            // This line is kept for backward compatibility but won't be reached due to above condition
             $orders = $ordersRepository->findBy(['createdBy' => $this->getUser()]);
         } else {
             $orders = $ordersRepository->findBy(['user' => $this->getUser()]);
@@ -92,7 +95,8 @@ class OrdersController extends AbstractController
         EntityManagerInterface $em,
         ProductsRepository $productsRepository,
         ServicesRepository $servicesRepository,
-        UserRepository $userRepository
+        UserRepository $userRepository,
+        ActivityLogger $activityLogger
     ): Response
     {
         // Check if user is logged in
@@ -179,6 +183,15 @@ class OrdersController extends AbstractController
                 $em->persist($order);
                 $em->flush();
                 
+                // Log the activity
+                $activityLogger->log(
+                    'Created Order',
+                    'Order #' . $order->getId() . 
+                    ' | Customer: ' . ($order->getUser() ? $order->getUser()->getUsername() : 'N/A') .
+                    ' | Item: ' . ($order->getProductId() ? $order->getProductId()->getName() : ($order->getServiceId() ? $order->getServiceId()->getName() : 'N/A')) .
+                    ' | Price: ₱' . number_format($order->getPrice(), 2)
+                );
+                
                 $this->addFlash('success', 'Order created successfully!');
                 return $this->redirectToRoute('app_orders_index');
                 
@@ -201,7 +214,8 @@ class OrdersController extends AbstractController
         Orders $order, 
         EntityManagerInterface $em,
         ProductsRepository $productsRepository,
-        ServicesRepository $servicesRepository
+        ServicesRepository $servicesRepository,
+        ActivityLogger $activityLogger
     ): Response
     {
         // Check if user is logged in
@@ -218,7 +232,7 @@ class OrdersController extends AbstractController
         
         $services = $servicesRepository->findAll();
         
-        // Store original order details for comparison
+        // Store original order details for logging
         $originalItem = $order->getProductId() 
             ? ($order->getProductId()->getName() . ' (Product)')
             : ($order->getServiceId() 
@@ -292,13 +306,22 @@ class OrdersController extends AbstractController
                 
                 $em->flush();
                 
-                // Get new order details
+                // Get new order details for logging
                 $newItem = $order->getProductId() 
                     ? ($order->getProductId()->getName() . ' (Product)')
                     : ($order->getServiceId() 
                         ? ($order->getServiceId()->getName() . ' (Service)') 
                         : 'No Item');
                 $newPrice = $order->getPrice();
+                
+                // Log the activity
+                $activityLogger->log(
+                    'Edited Order',
+                    'Order #' . $order->getId() . 
+                    ' | Customer: ' . ($order->getUser() ? $order->getUser()->getUsername() : 'N/A') .
+                    ' | Changed from: ' . $originalItem . ' (₱' . number_format($originalPrice, 2) . ')' .
+                    ' | To: ' . $newItem . ' (₱' . number_format($newPrice, 2) . ')'
+                );
                 
                 $this->addFlash('success', 'Order updated successfully!');
                 return $this->redirectToRoute('app_orders_index');
@@ -370,7 +393,12 @@ class OrdersController extends AbstractController
     }
 
     #[Route('/delete/{id}', name: 'app_orders_delete', methods: ['POST'])]
-    public function delete(Request $request, Orders $order, EntityManagerInterface $em): Response
+    public function delete(
+        Request $request, 
+        Orders $order, 
+        EntityManagerInterface $em,
+        ActivityLogger $activityLogger
+    ): Response
     {
         // Check if user is logged in
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
@@ -380,6 +408,14 @@ class OrdersController extends AbstractController
         
         if ($this->isCsrfTokenValid('delete' . $order->getId(), $request->request->get('_token'))) {
             try {
+                // Store order details for logging before deletion
+                $orderId = $order->getId();
+                $customerName = $order->getUser() ? $order->getUser()->getUsername() : 'Deleted User';
+                $itemName = $order->getProductId() 
+                    ? $order->getProductId()->getName() 
+                    : ($order->getServiceId() ? $order->getServiceId()->getName() : 'No Item');
+                $price = $order->getPrice();
+                
                 // If it's a product order, restore the quantity
                 if ($order->getProductId()) {
                     $product = $order->getProductId();
@@ -389,6 +425,15 @@ class OrdersController extends AbstractController
                 
                 $em->remove($order);
                 $em->flush();
+                
+                // Log the activity
+                $activityLogger->log(
+                    'Deleted Order',
+                    'Order #' . $orderId . 
+                    ' | Customer: ' . $customerName .
+                    ' | Item: ' . $itemName .
+                    ' | Price: ₱' . number_format($price, 2)
+                );
                 
                 $this->addFlash('success', 'Order deleted successfully!');
             } catch (\Exception $e) {
@@ -404,8 +449,8 @@ class OrdersController extends AbstractController
      */
     private function checkOrderAccess(Orders $order, string $action = 'view'): void
     {
-        // Admin has full access to everything
-        if ($this->isGranted('ROLE_ADMIN')) {
+        // Admin and Staff have full access to everything
+        if ($this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_STAFF')) {
             return;
         }
 
@@ -417,6 +462,7 @@ class OrdersController extends AbstractController
         $currentUser = $this->getUser();
         
         // Staff can access orders they created or orders assigned to them
+        // Note: This block is kept for backward compatibility but won't be reached due to above condition
         if ($this->isGranted('ROLE_STAFF')) {
             $orderCreator = $order->getCreatedBy();
             $orderUser = $order->getUser();

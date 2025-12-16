@@ -14,7 +14,7 @@
                     {% if is_granted('ROLE_ADMIN') %}
                         All Orders
                     {% elseif is_granted('ROLE_STAFF') %}
-                        My Created Orders
+                        All Orders
                     {% elseif is_granted('ROLE_USER') %}
                         My Orders
                     {% else %}
@@ -132,7 +132,7 @@
                                         <a href="{{ path('app_orders_show', {'id': order.id}) }}" 
                                            class="text-blue-600 hover:text-blue-800 mx-1">Show</a>
 
-                                        {% if is_granted('ROLE_ADMIN') %}
+                                        {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_STAFF') %}
                                             <a href="{{ path('app_orders_edit', {'id': order.id}) }}"
                                                class="text-yellow-600 hover:text-yellow-800 mx-1">Edit</a>
                                         {% endif %}
